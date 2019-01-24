@@ -1,0 +1,173 @@
+/*
+ * Copyright 2018 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.checkboxContainer {
+  margin-left: auto;
+  border-radius: 10px;
+}
+
+.websiteIcon {
+  padding-right: 12px;
+}
+
+.websiteName {
+  font-family: 'Google Sans', Arial, sans-serif;
+  font-size: 16px;
+  color: #FFFFFF;
+  line-height: 36px;
+}
+
+.title {
+  font-family: 'Google Sans', Arial, sans-serif;
+  font-size: 14px;
+  color: #FFFFFF;
+  line-height: 30px;
+  padding-left: 24px;
+  padding-right: 42px;
+  padding-bottom: 8px;
+}
+
+.title.useLargeFont {
+  font-size: 24px;
+}
+
+.container {
+  padding-top: 18px;
+  height: 100%;
+}
+
+.listItem {
+  background: rgba(255,255,255,0);
+  margin-top: 2px;
+  margin-bottom: 2px;
+  cursor: pointer;
+}
+
+.listItem:hover {
+  background: rgba(255,255,255,0.12);
+}
+
+.listItem.selected {
+  background: rgba(255,255,255,0.24);
+}
+
+.privacyNotice {
+  color: rgba(255,255,255,0.60);
+  padding-top: 14px;
+  padding-left: 24px;
+  padding-right: 24px;
+  padding-bottom: 24px;
+  font-size: 14px;
+}
+
+/**
+ * Cascade the animation by using delays: The title and privacy notice go
+ * first, then each list item.
+ */
+.container .title.animateIn {
+  animation-delay:0ms;
+}
+.container .privacyNotice.animateIn {
+  animation-delay:0ms;
+}
+.container mat-list-item.animateIn:nth-of-type(1) {
+  animation-delay:600ms;
+}
+.container mat-list-item.animateIn:nth-of-type(2) {
+  animation-delay:650ms;
+}
+.container mat-list-item.animateIn:nth-of-type(3) {
+  animation-delay:700ms;
+}
+.container mat-list-item.animateIn:nth-of-type(4) {
+  animation-delay:750ms;
+}
+.container mat-list-item.animateIn:nth-of-type(5) {
+  animation-delay:800ms;
+}
+
+@keyframes cascadeAnimateIn {
+  0% {
+    opacity:0;
+    transform:translate(340px,0);
+  }
+
+  100% {
+    opacity:1;
+    transform:translate(0, 0);
+  }
+}
+
+/**
+ *Apply the animation to every list item
+ */
+.container .animateIn {
+  animation-name: cascadeAnimateIn;
+  animation-duration: 1s;
+  animation-timing-function: ease-in-out;
+  animation-delay: 0s;
+  animation-direction: forwards;
+  animation-fill-mode: both;
+  animation-iteration-count: 1;
+}
+
+/**
+ * Cascade the animation by using delays: The title and privacy notice go
+ * first, then each list item.
+ */
+.container .title.animateOut {
+  animation-delay:0ms;
+}
+.container .privacyNotice.animateOut {
+  animation-delay:0ms;
+}
+.container .animateOut:nth-of-type(1) {
+  animation-delay:50ms;
+}
+.container .animateOut:nth-of-type(2) {
+  animation-delay:100ms;
+}
+.container .animateOut:nth-of-type(3) {
+  animation-delay:150ms;
+}
+.container .animateOut:nth-of-type(4) {
+  animation-delay:200ms;
+}
+.container .animateOut:nth-of-type(5) {
+  animation-delay:250ms;
+}
+
+@keyframes cascadeAnimateOut {
+  0% {
+    opacity:1;
+    transform:translate(0,0);
+  }
+
+  100% {
+    opacity:0;
+    transform:translate(-340px, 0);
+  }
+}
+
+.container .animateOut {
+  animation-name: cascadeAnimateOut;
+  animation-duration: 1s;
+  animation-timing-function: ease-in-out;
+  animation-delay: 0s;
+  animation-direction: forwards;
+  animation-fill-mode: both;
+  animation-iteration-count: 1;
+}

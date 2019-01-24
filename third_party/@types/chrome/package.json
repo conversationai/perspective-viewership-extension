@@ -1,0 +1,44 @@
+{
+    "name": "@types/chrome",
+    "version": "0.0.65",
+    "description": "TypeScript definitions for Chrome extension development",
+    "license": "MIT",
+    "contributors": [
+        {
+            "name": "Matthew Kimber",
+            "url": "https://github.com/matthewkimber",
+            "githubUsername": "matthewkimber"
+        },
+        {
+            "name": "otiai10",
+            "url": "https://github.com/otiai10",
+            "githubUsername": "otiai10"
+        },
+        {
+            "name": "couven92",
+            "url": "https://github.com/couven92",
+            "githubUsername": "couven92"
+        },
+        {
+            "name": "RReverser",
+            "url": "https://github.com/rreverser",
+            "githubUsername": "rreverser"
+        },
+        {
+            "name": "sreimer15",
+            "url": "https://github.com/sreimer15",
+            "githubUsername": "sreimer15"
+        }
+    ],
+    "main": "",
+    "repository": {
+        "type": "git",
+        "url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+    },
+    "scripts": {},
+    "dependencies": {
+        "@types/filesystem": "*"
+    },
+    "typesPublisherContentHash": "4767335389f36b038e9037b974c411b55251c54c30b839e9e0e36564974b3a5b",
+    "typeScriptVersion": "2.4"
+}

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 50.2 (55047) - http://www.bohemiancoding.com/sketch -->
+    <title>ic_youtube</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <path d="M21.58,7.19 C21.35,6.33 20.67,5.65 19.81,5.42 C18.25,5 12,5 12,5 C12,5 5.75,5 4.19,5.42 C3.33,5.65 2.65,6.33 2.42,7.19 C2,8.75 2,12 2,12 C2,12 2,15.25 2.42,16.81 C2.65,17.67 3.33,18.35 4.19,18.58 C5.75,19 12,19 12,19 C12,19 18.25,19 19.81,18.58 C20.67,18.35 21.35,17.67 21.58,16.81 C22,15.25 22,12 22,12 C22,12 22,8.75 21.58,7.19 Z M10,15 L10,9 L15.2,12 L10,15 Z" id="path-1"></path>
+    </defs>
+    <g id="ic_youtube" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect id="bounds" fill-opacity="0" fill="#FFFFFF" x="0" y="0" width="24" height="24"></rect>
+        <mask id="mask-2" fill="white">
+            <use xlink:href="#path-1"></use>
+        </mask>
+        <use id="Shape" fill="#FFFFFF" fill-rule="nonzero" xlink:href="#path-1"></use>
+    </g>
+</svg>

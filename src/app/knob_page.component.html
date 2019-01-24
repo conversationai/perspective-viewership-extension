@@ -1,0 +1,138 @@
+<!--
+  Copyright 2018 Google LLC
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<div #bg class="container" [ngClass]="{
+    'animateIn': applyAnimateInAnimationClass,
+    'hidden': waitingForAnimateIn
+  }"
+  [attr.aria-hidden]="waitingForAnimateIn">
+  <div class="heading" role="region">
+    <div [attr.aria-hidden]="currentWebsite === null || !enabledWebsites[currentWebsite]"
+         [ngClass]="{'hidden': currentWebsite === null || !enabledWebsites[currentWebsite]}">
+      <div class="instructions" role="heading">Set the volume on comments you see.</div>
+      <div class="arrowAndTextDescription"
+           [attr.aria-label]="getKnobA11yAnnouncement()"
+           role="status">
+        <div class="arrowIconContainer">
+          <mat-icon class="arrowIcon" svgIcon="tune-arrow"></mat-icon>
+        </div>
+        <div class="carouselViewWindow knobDescriptionChoice"
+             [attr.aria-hidden]="tuneDisabled"
+             [ngClass]="{'hidden': tuneDisabled }"
+             role="group">
+          <!-- TODO: There is a really weird bug when using ChromeVox and using ctrl + arrow keys to read the
+               carousel text that messes up the CSS. The screenreader reads the correct text, so it's still
+               usable, but we should look into the cause of this. -->
+          <div #knobDescriptionCarousel class="carousel">
+            <div class="knobDescriptionChoice" [attr.aria-hidden]="knobDescriptionIndex !== 0">Hide it all</div>
+            <div class="knobDescriptionChoice keepItDescription" [attr.aria-hidden]="knobDescriptionIndex !== 1">
+              <div class="keepItText">Keep it</div>
+              <div class="carouselViewWindow knobSubDescriptionChoice">
+                <div #knobSubDescriptionCarousel class="carousel">
+                  <div class="knobSubDescriptionChoice" *ngFor="let choice of knobSubDescriptionOptions; let i = index"
+                    [attr.aria-hidden]="i !== knobSubDescriptionIndex">
+                    {{choice}}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="knobDescriptionChoice" [attr.aria-hidden]="knobDescriptionIndex !== 2">Show it all</div>
+          </div>
+        </div>
+        <div class="disabledDescription"
+             [attr.aria-hidden]="!tuneDisabled"
+             [ngClass]="{'hidden': !tuneDisabled }">Tune is off</div>
+      </div>
+    </div>
+    <div *ngIf="currentWebsite === null">
+      <div class="unsupportedSiteInstructions instructions">
+        <div>
+          Read comments on enabled sites to start using Tune.
+        </div>
+        <div class="websiteLinks">
+        <button mat-button class="websiteLink" (click)="openLink('https://youtube.com')">
+          <mat-icon svgIcon="youtube"></mat-icon>
+          YouTube
+        </button>
+        <button mat-button class="websiteLink" (click)="openLink('https://twitter.com')">
+          <mat-icon svgIcon="twitter"></mat-icon>
+          Twitter
+        </button>
+        <button mat-button class="websiteLink" (click)="openLink('https://facebook.com')">
+          <mat-icon svgIcon="facebook"></mat-icon>
+          Facebook
+        </button>
+        <button mat-button class="websiteLink" (click)="openLink('https://reddit.com')">
+          <mat-icon svgIcon="reddit"></mat-icon>
+          Reddit
+        </button>
+        + most major publisher sites
+        </div>
+      </div>
+    </div>
+    <div *ngIf="currentWebsite !== null && !enabledWebsites[currentWebsite]">
+      <div class="disabledSiteInstructions instructions">
+        To use Tune on {{websiteNameMap[currentWebsite]}},
+        update your <span class="emphasis settingsLink" aria-role="link" (click)="openSettings(settingsPage.WEBSITES)">settings</span><span
+          class="emphasis">.</span>
+      </div>
+    </div>
+  </div>
+  <!-- TODO: Even though "heading" isn't the correct role, I can't figure out
+       how to get ChromeVox to focus on the dialContainer to read the
+       description with other roles. Look into this. -->
+  <div #dialContainer class="dialContainer" [ngClass]="{
+        'disabled': shouldUseDisabledUIStyle()
+      }" (click)="onDialClick($event)"
+      role="heading"
+      [attr.aria-hidden]="currentWebsite === null"
+      [attr.aria-label]="'Dial control. Dial position is at ' + round(dialPosition * 100) + 'percent. Use the arrow keys to change the dial position.'">
+    <div #dragZone id="dragZone" class="dragzone" draggable="true" (dragstart)="onKnobDragStart($event)" (drag)="onKnobDrag($event)">
+    </div>
+    <div #dial class="dial" (transitionend)="transitionEnd($event)">
+      <div #tail class="tail"></div>
+    </div>
+    <div class="dial-shadow-container">
+      <div class="dial-shadow"></div>
+    </div>
+    <div class="galaxy"></div>
+    <div class="progressContainer">
+      <svg class="progress" viewBox='0 0 185 185'>
+        <circle #circle cx='92.5' cy='92.5' r='92' stroke-width="10" [ngStyle]="{'stroke-dashoffset':svgProgressValue}" />
+      </svg>
+    </div>
+  </div>
+  <div class="dialLineContainer" [ngClass]="{'hidden': currentWebsite === null}"
+      [attr.aria-hidden]="currentWebsite === null">
+    <div class="dialLine left" [ngClass]="{'disabled': shouldUseDisabledUIStyle()}"></div>
+    <div class="dialLine right" [ngClass]="{'disabled': shouldUseDisabledUIStyle()}"></div>
+  </div>
+  <div class="settingsButtonContainer">
+    <button mat-icon-button aria-label="settings" (click)="openSettings()">
+      <mat-icon>settings</mat-icon>
+    </button>
+  </div>
+  <div class="shortcuts" [ngClass]="{
+      'disabled': shouldUseDisabledUIStyle(),
+      'hidden': currentWebsite === null
+    }" [attr.aria-hidden]="currentWebsite === null">
+    <button mat-button id="hideAll"
+            aria-label="Hide all"
+            [disabled]="shouldIgnoreKnobInteractionEvents()" (click)="setDialPosition(0, true)">Hide All</button>
+    <button mat-button id="showAll"
+            aria-label="Show all"
+            [disabled]="shouldIgnoreKnobInteractionEvents()" (click)="setDialPosition(1, true)">Show All</button>
+  </div>
+</div>

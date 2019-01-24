@@ -1,0 +1,464 @@
+/*
+ * Copyright 2018 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  font-family: 'Google Sans', Arial, sans-serif;
+  font-weight: normal;
+}
+
+.container.hidden {
+  opacity: 0;
+}
+
+.dialContainer {
+  height: 300px;
+  width: 100%;
+  position: relative;
+}
+
+.dialContainer.disabled {
+  opacity: 0.24;
+}
+
+.disabledImage {
+  margin-top: 24px;
+  margin-left: 12px;
+}
+
+.dialContainer.hidden,
+.dialLineContainer.hidden,
+.shortcuts.hidden {
+  opacity: 0;
+}
+
+.heading {
+  padding: 0px 24px;
+  margin-top: 18px;
+  font-size: 24px;
+  line-height: 30px;
+  overflow: hidden;
+  margin-bottom: auto;
+}
+
+.heading > .hidden {
+  display: none;
+}
+
+.instructions.unsupportedSiteInstructions {
+  font-size: 24px;
+  line-height: 30px;
+  /**
+   * The text is a bit too big to fit into the area available, so we use
+   * position: absolute to make it float over the area above the knob without
+   * messing up the layout flow. The knob is disabled anyway in this case so it
+   * doesn't disrupt the dragging UI.
+   */
+  position: absolute;
+  left: 24px;
+  color: rgba(255,255,255,1);
+  width:86%;
+}
+
+.instructions.unsupportedSiteInstructions .websiteLinks {
+  margin-top: 48px;
+  font-size: 14px;
+}
+
+.instructions.unsupportedSiteInstructions .websiteLink {
+  display: block;
+  font-size: 16px;
+  z-index: 201; /* To be above the knob */
+  margin-top: 14px;
+  margin-bottom: 14px;
+  padding-left: 0px;
+}
+
+.instructions.unsupportedSiteInstructions .websiteLink .mat-icon {
+  padding-right: 8px;
+}
+
+.instructions a {
+  color: #fff;
+}
+
+.instructions.disabledSiteInstructions {
+  font-size: 24px;
+  line-height: 30px;
+}
+
+.border {
+  display: inline-block;
+  text-decoration: none;
+}
+
+.border::after {
+  content: '';
+  display: block;
+  height: 2px;
+  background-color: rgba(255, 255, 255, .30);
+  transition: background-color .3s;
+}
+
+.border:hover::after {
+  background-color: rgba(255, 255, 255, .60);
+}
+
+.settingsLink {
+  cursor: pointer;
+}
+
+.settingsLink:hover {
+  text-decoration: underline;
+  color: #ffffff;
+}
+
+.site-link {
+  width: 35px;
+  background-position: center;
+  background-size: 100%;
+  justify-content: flex-end;
+}
+
+.site-link img {
+  display: flex;
+}
+
+.logo {
+  font-family: 'Google Sans', Arial, sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.instructions {
+  color: rgba(255,255,255,0.60);
+}
+
+.arrowAndTextDescription {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  /* Note: without this, we were getting some odd layout bugs with things
+   overflowing onto the next line. */
+  height: 32px;
+}
+
+.disabledDescription {
+  display: inline-flex;
+}
+
+.disabledDescription.hidden {
+  display: none;
+}
+
+.arrowAndTextDescription > .carouselViewWindow {
+  display: inherit;
+}
+
+.arrowAndTextDescription > .carouselViewWindow.hidden {
+  display: none;
+}
+
+.arrowIconContainer {
+  padding-right: 8px;
+  font-size: 32px;
+  vertical-align: middle;
+}
+
+.arrowIcon {
+  width: 30px;
+}
+
+/* A "window" onto the rotating "carousel", which contains the text description
+   words. The width value should match knobDescriptionWordChoice. */
+.carouselViewWindow {
+  position: relative;
+  overflow: hidden;
+}
+
+/* The carousel items are a single row, flowing off the side of the page. */
+.carousel {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  position: absolute;
+  transition: transform 0.5s ease-in-out;
+}
+
+.knobDescriptionChoice {
+  width: 250px;
+}
+
+.keepItDescription {
+  display: inline-flex;
+  flex-wrap: nowrap;
+}
+
+.keepItText {
+  margin-right: 0.25em;
+}
+
+.knobSubDescriptionChoice {
+  width: 152px;
+}
+
+.ln {
+  background-color: white;
+  height: 2px;
+  width: 100%;
+}
+
+.dragzone {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  margin: auto;
+  display: flex;
+  justify-content: center;
+  z-index: 200;
+  cursor: pointer;
+}
+
+.disabled > .dragzone {
+  cursor: default;
+}
+
+.dial {
+  height: 175px;
+  width: 175px;
+  position: absolute;
+  background-color: white;
+  border-radius: 100%;
+  margin: auto;
+  left: 0;
+  right: 0;
+  margin-top: 80px;
+  display: flex;
+  justify-content: center;
+  transition: transform .2s linear;
+  transform: rotate(25deg);
+  z-index: 10;
+  will-change:transform;
+  cursor: pointer;
+}
+
+.dial-shadow-container {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+}
+
+.dial-shadow {
+  height: 175px;
+  width: 175px;
+  background-color: white;
+  border-radius: 100%;
+  margin: auto;
+  margin-bottom: 45px;
+  margin-top: 80px;
+  box-shadow:0px 0px 50px 0px rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  z-index: 0;
+}
+
+.progress {
+  height: 185px;
+  width: 185px;
+  position: absolute;
+  border-radius: 100%;
+  margin: auto;
+  left: 0;
+  right: 0;
+  opacity: 0.4;
+  z-index: 1;
+  margin-top: 75px;
+}
+
+.progressContainer {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+}
+
+.tail {
+  width: 0;
+  height: 0;
+  border-left: 14px solid transparent;
+  border-right: 14px solid transparent;
+  border-top: 20px solid white;
+  position: absolute;
+  bottom: -17px;
+}
+
+.base-nav {
+  height: 56px;
+  position: absolute;
+  width: 100%;
+  background-color: white;
+  bottom:0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.shortcuts {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.shortcuts button {
+  font-family: 'Roboto';
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: 14px;
+  line-height: 18px;
+  color: rgba(255,255,255,0.60);
+  display: flex;
+  width: 33%;
+  height: 38px;
+  margin: 0px 8px 8px 8px;
+  letter-spacing: 1px;
+  justify-content: center;
+  cursor:pointer;
+}
+
+.shortcuts.disabled button {
+  color: rgba(255,255,255,0.24);
+}
+
+.base-nav div {
+  display: inherit;
+  justify-content: center;
+  width: 50%;
+  height: 100%;
+}
+
+.galaxy {
+  position: absolute;
+  bottom: 94px;
+  z-index: 0;
+}
+
+.galaxy canvas {
+  position: absolute;
+  z-index: 0;
+}
+
+svg {
+  height: 175px;
+  width: 175px;
+  transform: rotate(120deg);
+}
+circle {
+  stroke: white;
+  fill: none;
+  stroke-dasharray: 1177,0,0;
+  stroke-dashoffset: 1176;
+  transition: all .2s linear;
+}
+
+.settingsButtonContainer {
+  z-index: 201;
+}
+
+.dialLineContainer {
+  display: flex;
+}
+
+.dialLine {
+  height: 1px;
+  width: 33px;
+  opacity: 0.38;
+  background-color: #ffffff;
+  margin-left: 50px;
+  margin-right: 50px;
+}
+
+.dialLine.disabled {
+  opacity: 0.24;
+}
+
+.dialLine.left {
+  transform:rotate(-60deg);
+}
+
+.dialLine.right {
+  transform:rotate(60deg);
+}
+
+@keyframes translateFadeInAnimation {
+  0% {
+    opacity:0;
+    transform:translate(-30px,0);
+  }
+
+  100% {
+    opacity:1;
+    transform:translate(0,0);
+  }
+}
+
+@keyframes fadeInAnimation {
+  0% {
+    opacity:0;
+  }
+
+  100% {
+    opacity:1;
+  }
+}
+
+.container.animateIn .carousel {
+  transition: transform .5s ease-in-out 0.3s;
+}
+
+.container.animateIn .carouselViewWindow {
+  animation-name: fadeInAnimation;
+  animation-duration: .5s;
+  animation-timing-function: ease-in-out;
+  animation-delay: .2s;
+  animation-direction: forwards;
+  animation-fill-mode: both;
+  animation-iteration-count: 1;
+}
+
+.container.animateIn .arrowIconContainer {
+  animation-name: translateFadeInAnimation;
+  animation-duration: .5s;
+  animation-timing-function: ease-in-out;
+  animation-delay: .5s;
+  animation-direction: forwards;
+  animation-fill-mode: both;
+  animation-iteration-count: 1;
+}
+
+.container.animateIn .instructions,
+.container.animateIn .dialLineContainer,
+.container.animateIn .settingsButtonContainer,
+.container.animateIn .shortcuts {
+  animation-name: fadeInAnimation;
+  animation-duration: .6s;
+  animation-timing-function: ease-in-out;
+  animation-delay: .4s;
+  animation-direction: forwards;
+  animation-fill-mode: both;
+  animation-iteration-count: 1;
+}
+

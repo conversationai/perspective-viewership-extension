@@ -1,0 +1,232 @@
+/*
+ * Copyright 2018 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.checkboxContainer {
+  margin-left: auto;
+  border-radius: 10px;
+}
+
+.arrowIcon {
+  margin-left: auto;
+  border-radius: 10px;
+  color: #FFFFFF;
+}
+
+.attributeName {
+  font-family: 'Google Sans', Arial, sans-serif;
+  font-size: 14px;
+  color: #FFFFFF;
+  line-height: 36px;
+}
+
+.title {
+  font-family: 'Google Sans', Arial, sans-serif;
+  font-size: 14px;
+  color: #FFFFFF;
+  line-height: 30px;
+  padding-left: 24px;
+  padding-right: 24px;
+  padding-bottom: 28px;
+}
+
+.container {
+  padding-top: 18px;
+  height: 100%;
+}
+
+.filterOption {
+  font-size: 16px;
+  color: #FFFFFF;
+  width: calc(100% - 32px);
+  padding-left: 16px;
+  padding-right: 16px;
+  height: 48px;
+  display: flex;
+}
+
+.filterOption:not(.selected) {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.filterOption .optionName {
+  font-weight: 500;
+}
+
+.filterOption .optionDetails {
+  font-size: 14px;
+}
+
+.mat-selection-list {
+  padding-top: 0px;
+}
+
+.mat-radio-label {
+  width: 100%;
+}
+
+.mat-radio-container {
+  margin-left: auto;
+}
+
+.listItem {
+  background: rgba(255,255,255,0);
+  cursor: pointer;
+  font-size: 14px;
+  padding-left: 14px;
+  height: 42px;
+}
+
+.listItem.learnMore {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding-left: 16px;
+  padding-right: 16px;
+  height: 48px;
+}
+
+.learnMoreText {
+  font-family: 'Google Sans', Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: #FFFFFF;
+  line-height: 36px;
+}
+
+.filterOption:hover,
+.listItem:hover {
+  background: rgba(255,255,255,0.12);
+}
+
+.filterOption.selected,
+.listItem.selected {
+  background: rgba(255,255,255,0.24);
+}
+
+.listItem:focus {
+  outline: none;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.backButtonContainer {
+  text-align: center;
+  margin-top: auto;
+  margin-bottom: 42px;
+}
+
+.backButton {
+  text-transform: uppercase;
+  margin: 12px 0px 0px 12px;
+}
+
+/**
+ * Cascade the animation by using delays: The title goes first, then each list
+ * item.
+ */
+.container .title.animateIn {
+  animation-delay:0ms;
+}
+.container mat-list-item.animateIn:nth-of-type(1) {
+  animation-delay:600ms;
+}
+.container mat-list-item.animateIn:nth-of-type(2) {
+  animation-delay:650ms;
+}
+.container mat-list-item.animateIn:nth-of-type(3) {
+  animation-delay:700ms;
+}
+.container mat-list-item.animateIn:nth-of-type(4) {
+  animation-delay:750ms;
+}
+.container mat-list-item.animateIn:nth-of-type(5) {
+  animation-delay:800ms;
+}
+.container mat-list-item.animateIn:nth-of-type(6) {
+  animation-delay:850ms;
+}
+
+@keyframes cascadeAnimateIn {
+  0% {
+    opacity:0;
+    transform:translate(340px,0);
+  }
+
+  100% {
+    opacity:1;
+    transform:translate(0, 0);
+  }
+}
+
+/**
+ *Apply the animation to every list item
+ */
+.container .animateIn {
+  animation-name: cascadeAnimateIn;
+  animation-duration: 1s;
+  animation-timing-function: ease-in-out;
+  animation-delay: 0s;
+  animation-direction: forwards;
+  animation-fill-mode: both;
+  animation-iteration-count: 1;
+}
+
+/**
+ * Cascade the animation by using delays: The title goes first, then each list
+ * item.
+ */
+.container .title.animateOut {
+  animation-delay:0ms;
+}
+.container mat-list-item.animateOut:nth-of-type(1) {
+  animation-delay:50ms;
+}
+.container mat-list-item.animateOut:nth-of-type(2) {
+  animation-delay:100ms;
+}
+.container mat-list-item.animateOut:nth-of-type(3) {
+  animation-delay:150ms;
+}
+.container mat-list-item.animateOut:nth-of-type(4) {
+  animation-delay:200ms;
+}
+.container mat-list-item.animateOut:nth-of-type(5) {
+  animation-delay:250ms;
+}
+.container mat-list-item.animateOut:nth-of-type(6) {
+  animation-delay:300ms;
+}
+
+@keyframes cascadeAnimateOut {
+  0% {
+    opacity:1;
+    transform:translate(0,0);
+  }
+
+  100% {
+    opacity:0;
+    transform:translate(-340px, 0);
+  }
+}
+
+.container .animateOut {
+  animation-name: cascadeAnimateOut;
+  animation-duration: 1s;
+  animation-timing-function: ease-in-out;
+  animation-delay: 0s;
+  animation-direction: forwards;
+  animation-fill-mode: both;
+  animation-iteration-count: 1;
+}

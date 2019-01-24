@@ -1,0 +1,46 @@
+<!--
+  Copyright 2018 Google LLC
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<div class="container" [ngClass]="{'hidden': getPageHidden(pages.auth)}">
+  <div class="title">Sign in with Google and click the Tune extension icon to get started.</div>
+  <div class="personalDataNotice">No personal data is stored.</div>
+  <!-- TODO: replace images with SVGs so we can use mat-icon. -->
+  <img class="clickIconImageUrl" src="click-extension-icon.png"
+       alt="After authenticating, click on the Tune extension icon to get started.">
+  <div class="bottomButtonWrapper authPageHack">
+    <button class="bottomButton" mat-button color="primary" (click)="signIn()">
+      <!-- TODO: edit this image to get rid of the border. -->
+      <!-- Note: using double-resolution version, but setting width to get
+           higher quality image. -->
+      <img width="191" src="btn_google_signin_light_normal_web_2x.png"
+           alt="Sign in with Google">
+    </button>
+  </div>
+</div>
+
+<div class="container" [ngClass]="{'hidden': getPageHidden(pages.intro)}">
+  <div class="title">Control for comments on YouTube, Twitter, Facebook, Reddit, and more.</div>
+  <div #introPageAnimationPlaceholder class="animationPlaceholder"></div>
+  <div class="bottomButtonWrapper">
+    <button class="bottomButton" mat-button color="primary" (click)="handleGetStartedClick()">Get started</button>
+  </div>
+</div>
+
+<div class="container" [ngClass]="{'hidden': getPageHidden(pages.websiteSettings)}">
+  <tune-website-settings #websiteSettings [showPrivacyNotice]="true"></tune-website-settings>
+  <div class="bottomButtonWrapper">
+    <button class="bottomButton" mat-button color="primary" (click)="notifySetupComplete()">Done</button>
+  </div>
+</div>

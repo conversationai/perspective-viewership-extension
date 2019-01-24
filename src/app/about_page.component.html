@@ -1,0 +1,39 @@
+<!--
+  Copyright 2018 Google LLC
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  -->
+<div class="container">
+  <div class="title" role="heading">
+    Abuse and harassment take attention away from online discussions.
+    Tune uses <a class="border" href="https://perspectiveapi.com"
+      (click)="openLink('https://perspectiveapi.com')">Perspective</a> to help
+    you focus on what matters. Learn more about our work on
+    <a class="border" href="https://github.com/conversationai"
+      (click)="openLink('https://github.com/conversationai')">Github</a> and
+    <a class="border" href="https://medium.com/the-false-positive"
+      (click)="openLink('https://medium.com/the-false-positive')">Medium.</a>
+  </div>
+
+  <div class="bottomButtons">
+    <div class="linkButton">
+      <button mat-button (click)="showFeedback()">Feedback</button>
+    </div>
+    <div class="linkButton">
+      <button mat-button (click)="openLink('https://policies.google.com/terms')">Terms of service</button>
+    </div>
+    <div class="linkButton">
+      <button mat-button (click)="openLink('https://policies.google.com/privacy')">Privacy policy</button>
+    </div>
+  </div>
+</div>

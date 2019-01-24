@@ -1,0 +1,51 @@
+<!--
+  Copyright 2018 Google LLC
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<div class="container">
+  <div class="backButton">
+    <button mat-button (click)="goBack()">
+      <mat-icon class="backIcon">keyboard_arrow_left</mat-icon><span>Back</span>
+    </button>
+  </div>
+
+  <div class="title" role="heading">
+    <span *ngIf="!feedbackSubmitted">We would love to hear from you.</span>
+    <span *ngIf="feedbackSubmitted">Thanks for the feedback!</span>
+  </div>
+
+  <form class="feedbackForm" (ngSubmit)="sendFeedback()" #feedbackForm="ngForm">
+    <div class="feedbackFormInputs" [ngClass]="{'hidden': feedbackSubmitted}">
+      <mat-form-field class="fullWidth" appearance="outline">
+        <mat-label>Feedback</mat-label>
+        <textarea matInput cdkTextareaAutosize placeholder="Feedback"
+                  required [(ngModel)]="feedbackText" name="feedback"></textarea>
+      </mat-form-field>
+    </div>
+
+    <div class="privacyNotice" role="contentinfo">
+      Your feedback and additional information <br>
+      referred to in the <button mat-button class="link" (click)="openLink('https://policies.google.com/privacy')">privacy policy</button>
+      will be sent <br>
+      to the Perspective team.
+    </div>
+
+    <div class="submitButtonContainer">
+      <button mat-button type="submit"
+              class="submitButton"
+              tabindex="0"
+              [disabled]="!feedbackForm.valid">Submit</button>
+    </div>
+  </form>
+</div>

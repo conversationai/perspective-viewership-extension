@@ -1,0 +1,198 @@
+/*
+ * Copyright 2018 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Note: The tune-state attribute is on the host element, so we use the :host
+ * selector when referencing tune-state.
+ */
+
+/* See component code for notes on visibility handling, and why heights aren't
+   set in CSS. */
+
+.--tune-placeholder {
+  display: flex;
+}
+
+.--tune-hiddenCommentWrapper {
+  /* Without this, comments on Facebook are scrunched up to the left for some
+   reason. */
+  width: 100%;
+  transition: opacity 0.5s, height 0.5s;
+}
+
+/* Setting display: none will hide an element from the screenreader. */
+.hideCommentForA11y {
+  display: none;
+}
+
+:host[tune-state="show"] > .--tune-placeholder {
+  padding: 0px;
+  margin: 0;
+}
+
+:host[tune-state="show"] > .--tune-placeholder:hover {
+  background-color: #fff;
+}
+
+:host[tune-state="show"] > .--tune-placeholder.--tune-commentVisible {
+  background-color: #fff;
+}
+
+:host[tune-state="show"] > .--tune-placeholder > .--tune-hiddenCommentWrapper {
+  opacity: 1;
+}
+
+:host[tune-state="show"] > .--tune-placeholder > .--tune-horizontalUIWrapper {
+  height: 0;
+  overflow: hidden;
+  display: none;
+}
+
+:host[tune-state="show"] > .--tune-placeholder > .--tune-horizontalUIWrapper > .--tune-circle {
+  height: 0;
+  width: 0;
+}
+
+/**
+ * CSS rules for when a filter is applied. Note that if anything below changes
+ * the layout of the DOM significantly, it should be undone above.
+ */
+:host[tune-state="filter"] > .--tune-placeholder {
+  flex-direction: column;
+  justify-content: center;
+  padding: 0px 12px 0px 16px;
+}
+
+:host[tune-state="filter"] > .--tune-placeholder:hover {
+  box-shadow: inset 0px 0px 0px 1px #00000012;
+}
+
+:host[tune-state="filter"] > .--tune-placeholder.--tune-commentVisible {
+  box-shadow: inset 0px 0px 0px 1px #00000012;
+  /* Less padding on the bottom since the horizontal UI wrapper provides some
+   whitespace. */
+  padding: 12px 12px 4px 12px;
+}
+
+:host[tune-state="filter"] > .--tune-placeholder > .--tune-hiddenCommentWrapper {
+  opacity: 0;
+  overflow: hidden;
+}
+
+:host[tune-state="filter"] > .--tune-placeholder.--tune-commentVisible > .--tune-hiddenCommentWrapper {
+  opacity: 1;
+}
+
+:host[tune-state="filter"] > .--tune-placeholder > .--tune-horizontalUIWrapper {
+  height: auto;
+  display: flex;
+  width: 100%;
+  cursor: pointer;
+}
+
+:host[tune-state="filter"] > .--tune-placeholder.--tune-commentVisible > .--tune-horizontalUIWrapper {
+  cursor: default;
+}
+
+:host[tune-state="filter"] > .--tune-placeholder > .--tune-horizontalUIWrapper > .--tune-circle {
+  /* keep circle ratios from breaking */
+  min-height: 7px;
+  min-width: 7px;
+  max-height: 7px;
+  max-width: 7px;
+  border-radius: 50%;
+  margin-top: auto;
+  margin-bottom: auto;
+  display: inline-block;
+  overflow: hidden;
+}
+
+#--tune-feedbackYes, #--tune-feedbackNo {
+  display: none;
+}
+
+.--tune-commentVisible #--tune-feedbackYes, .--tune-commentVisible #--tune-feedbackNo {
+  display: inline;
+  margin-left: auto;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  opacity: 0.54;
+  color: rgba(0 0 0 .54 );
+  line-height: 20px;
+  font-weight: 500;
+  font-size: 12px;
+  padding: 0px 6px 0px 6px;
+}
+
+
+/** These always apply. */
+
+.--tune-textWrapper {
+  line-height: 32px;
+}
+
+.--tune-filterText {
+  color: rgba(0 0 0 .87);
+  font-size: 12px;
+  margin: 0px 0px 0px 0px;
+}
+
+.--tune-showbutton {
+  margin-left: auto;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  opacity: 0.54;
+  color: rgba(0 0 0 .54 );
+  font-weight: 500;
+  font-size: 12px;
+  padding: 0px 12px 0px 12px;
+}
+
+.--tune-filterMessage {
+  overflow: hidden;
+  display: flex;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.--tune-commentVisible > .--tune-horizontalUIWrapper > .--tune-detailWrapper > .--tune-textWrapper > .--tune-filterMessage {
+  display: none;
+}
+
+.--tune-detailWrapper {
+  font-size: 12px;
+  font-weight: normal;
+  display: flex;
+  width: 100%;
+  opacity: 0;
+  transition: opacity 0.5s;
+  margin: 0px 0px 0px 12px;
+}
+
+.--tune-detailWrapper.hoverClass {
+  opacity: 1;
+}
+
+.--tune-feedbackQuestionWrapper {
+  display: none;
+}
+
+.--tune-commentVisible > .--tune-horizontalUIWrapper > .--tune-detailWrapper > .--tune-textWrapper >.--tune-feedbackQuestionWrapper {
+  display: inline-block;
+  margin: 0px 12px 0px 0px;
+}

@@ -1,0 +1,92 @@
+/*
+ * Copyright 2018 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Tune rules for Reddit.
+ *
+ * TODO: Refactor some of the CSS rules so that we don't need to
+ * use !important.
+ */
+
+:host[tune-state="show"] .--tune-placeholder.--tune-reddit-placeholder {
+  display: block;
+  margin-left: -23px;
+  margin-bottom: 0px;
+  padding-left: 0px;
+}
+
+:host[tune-state="filter"] .--tune-placeholder.--tune-reddit-placeholder {
+  display: block;
+  margin-left: -23px;
+  margin-bottom: 0px;
+  padding-left: 0px;
+  padding-top: 0px;
+  padding-right: 18px;
+  padding-bottom: 0px;
+}
+
+.--tune-placeholder.--tune-reddit-placeholder.--tune-reddit-collapsed {
+  height: fit-content;
+  /**
+   * TODO: Disable height change transition for thread children as
+   * well on expanding. We want to match the existing Reddit UI, which doesn't
+   * have transitions for expand/collapse. Right now our animation transition
+   * CSS is overriding this on expand, which looks a bit weird.
+   */
+  transition: none;
+}
+
+:host[tune-state="filter"] .--tune-reddit-placeholder .--tune-hiddenCommentWrapper {
+  transition: all 0.5s;
+  transition-property: height, opacity !important;
+}
+
+:host[tune-state="filter"] .--tune-reddit-collapsed.--tune-commentVisible .--tune-hiddenCommentWrapper {
+  height: 100%;
+  transition: none;
+}
+
+:host[tune-state="filter"] .--tune-reddit-placeholder.--tune-commentVisible.--tune-reddit-collapsed {
+  height: fit-content;
+  transition: none;
+}
+
+:host[tune-state="filter"] > .--tune-placeholder.--tune-reddit-placeholder:hover {
+  box-shadow: none;
+  background-color: rgba(237, 239, 241, .5);
+}
+
+:host[tune-state="filter"] > .--tune-placeholder.--tune-reddit-placeholder.--tune-commentVisible {
+  box-shadow: none;
+  background-color: rgba(237, 239, 241, .5);
+}
+
+.--tune-reddit-placeholder .Comment {
+  margin-left: 0px;
+  margin-top: 0px;
+}
+
+.--tune-reddit-horizontalUIWrapper {
+  z-index: 2;
+  /* Position setting needed for z-index to have effect and make the bar appear
+   over the threadline element. */
+  position: relative;
+  padding-left: 18px;
+}
+
+.--tune-commentVisible  .--tune-reddit-horizontalUIWrapper {
+  background-color: #f8f8f8;
+}

@@ -1,0 +1,57 @@
+<!--
+  Copyright 2018 Google LLC
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<div class="container">
+  <div class="title"
+       [ngClass]="{
+         'animateIn': applyAnimateInAnimationClass,
+         'animateOut': applyAnimateOutAnimationClass,
+         'useLargeFont': showPrivacyNotice
+       }"
+       role="heading">
+    Where do you want to use tune?
+  </div>
+  <div *ngIf="showPrivacyNotice" class="privacyNotice" [ngClass]="{
+         'animateIn': applyAnimateInAnimationClass,
+         'animateOut': applyAnimateOutAnimationClass
+       }">
+    You can use Tune to control which comments you see on certain social
+    platforms and news sites. Tune does not sign in or post on your behalf.
+  </div>
+  <div>
+    <mat-selection-list tabindex="-1">
+      <mat-list-item *ngFor="let website of websiteKeys"
+          class="listItem"
+          role="option"
+          [attr.aria-label]="websiteNameMap[website]"
+          (click)="sendClickEventToCheckbox($event, checkbox, website)"
+          (keydown.enter)="sendKeyEventToCheckbox(website)"
+          (keydown.space)="sendKeyEventToCheckbox(website)"
+          [ngClass]="{
+                       'selected': websites[website],
+                       'animateIn': applyAnimateInAnimationClass,
+                       'animateOut': applyAnimateOutAnimationClass
+                     }">
+        <div class="websiteIcon">
+          <mat-icon [svgIcon]="website"></mat-icon>
+        </div>
+        <div class="websiteName">{{websiteNameMap[website]}}</div>
+        <div class="checkboxContainer">
+          <mat-checkbox #checkbox [(ngModel)]="websites[website]" (change)="onChecked()"></mat-checkbox>
+        </div>
+      </mat-list-item>
+    </mat-selection-list>
+  </div>
+</div>

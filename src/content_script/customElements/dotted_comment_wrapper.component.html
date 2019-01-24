@@ -1,0 +1,64 @@
+<!--
+  Copyright 2018 Google LLC
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!-- Use a list for ngClass since binding to the Object format doesn't support
+     dynamic class names. Just use empty strings for when classes should be absent. -->
+<div [ngClass]="[
+       '--tune-placeholder',
+       commentVisible ? '--tune-commentVisible' : ''
+     ].concat(customPlaceholderClasses)"
+     (mouseenter)="mouseEnterCallback()"
+     (mouseleave)="mouseLeaveCallback()">
+  <div #commentWrapper [ngClass]="{
+         '--tune-hiddenCommentWrapper': true,
+         customCommentWrapperClass: true,
+         'hideCommentForA11y': hideCommentForA11y
+       }"
+       (transitionend)="commentStyleTransitionEnd()">
+    <!-- Original comment DOM gets inserted here. -->
+    <ng-content></ng-content>
+  </div>
+  <div [ngClass]="['--tune-horizontalUIWrapper', customHorizontalUIWrapperClass]"
+       [attr.aria-label]="getA11yDescription()"
+       [attr.aria-hidden]="rawTuneState === TUNE_STATE.show"
+       (click)="horizontalWrapperClicked($event)"
+       role="group">
+    <div class="--tune-circle"
+         aria-label="Tune chrome extension icon"
+         [ngStyle]="{'backgroundColor': getColor(maxScore)}"></div>
+    <div class="--tune-detailWrapper"
+         [ngClass]="{'hoverClass': hasHoverState || commentVisible}">
+      <div class="--tune-textWrapper">
+        <div class="--tune-filterMessage --tune-filterText" [attr.aria-hidden]="commentVisible">{{filterMessage}}</div>
+        <div class="--tune-feedbackQuestionWrapper --tune-filterText" [attr.aria-hidden]="!commentVisible">
+          <div *ngIf="feedbackSent; else feedbackPrompt">
+            Thanks! Your feedback will help improve Tune.
+          </div>
+          <ng-template #feedbackPrompt>
+            <span>{{feedbackQuestion}}</span>
+            <ng-container *ngIf="feedbackQuestion !== ''">
+              <button id="--tune-feedbackYes" (click)="sendFeedback(true)">Yes</button>
+              <button id="--tune-feedbackNo" (click)="sendFeedback(false)">No</button>
+            </ng-container>
+          </ng-template>
+        </div>
+      </div>
+      <button class="--tune-showbutton"
+              (focus)="mouseEnterCallback()"
+              (blur)="mouseLeaveCallback()"
+              (click)="showButtonClicked($event)">{{buttonText}}</button>
+    </div>
+  </div>
+</div>

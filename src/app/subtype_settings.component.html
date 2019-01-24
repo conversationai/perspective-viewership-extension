@@ -1,0 +1,75 @@
+<!--
+  Copyright 2018 Google LLC
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<div class="container">
+  <div class="title"
+       [ngClass]="{
+         'animateIn': applyAnimateInAnimationClass,
+         'animateOut': applyAnimateOutAnimationClass
+       }"
+       role="heading">
+    What kind of comments do you want to filter?
+  </div>
+  <div>
+    <mat-radio-group class="filterOptionsRadioGroup"
+                     labelPosition="before"
+                     [(ngModel)]="subtypesEnabled"
+                     (change)="updateSubtypesEnabledSetting()">
+      <mat-radio-button class="filterOption"
+                        [value]="false"
+                        [ngClass]="{'selected': !subtypesEnabled}">
+        <span class="optionName">Filter Toxicity</span><span class="optionDetails"> (Default)</span>
+      </mat-radio-button>
+      <mat-radio-button class="filterOption"
+                        [value]="true"
+                        [ngClass]="{'selected': subtypesEnabled}">
+        <span class="optionName">Filter Mix</span><span class="optionDetails"> (Experimental)</span>
+      </mat-radio-button>
+    </mat-radio-group>
+    <mat-selection-list *ngIf="subtypesEnabled">
+      <mat-list-item *ngFor="let attribute of attributeKeys; let i = index"
+                     class="listItem"
+                     [attr.aria-label]="attributeNameMap[attribute]"
+                     role="option"
+                     (click)="sendClickEventToCheckbox($event, checkbox, attribute)"
+                     (keydown.enter)="sendKeyEventToCheckbox(attribute)"
+                     (keydown.space)="sendKeyEventToCheckbox(attribute)"
+                     [ngClass]="{
+                       'selected': attributes[attribute],
+                       'animateIn': applyAnimateInAnimationClass,
+                       'animateOut': applyAnimateOutAnimationClass
+                     }">
+        <div class="attributeName">{{attributeNameMap[attribute]}}</div>
+        <div class="checkboxContainer">
+          <mat-checkbox #checkbox [(ngModel)]="attributes[attribute]" (change)="onChecked()"></mat-checkbox>
+        </div>
+      </mat-list-item>
+    </mat-selection-list>
+    <div class="learnMore listItem"
+                   (keydown.enter)="onLearnMoreClicked()"
+                   (keydown.space)="onLearnMoreClicked()"
+                   (click)="onLearnMoreClicked()"
+                   [ngClass]="{
+                     'animateIn': applyAnimateInAnimationClass,
+                     'animateOut': applyAnimateOutAnimationClass
+                   }"
+                   role="button"
+                   aria-label="Learn more"
+                   tabindex="0">
+      <div class="learnMoreText">Learn more</div>
+      <mat-icon class="arrowIcon">keyboard_arrow_right</mat-icon>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,70 @@
+/*
+ * Copyright 2018 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Tune rules for Twitter.
+ */
+
+.--tune-placeholder.--tune-twitter-placeholder {
+  display: block;
+}
+
+:host[tune-state="filter"] .--tune-placeholder.--tune-twitter-placeholder {
+  background-color: #ffffff;
+  box-shadow: none;
+}
+
+:host[tune-state="filter"] .--tune-placeholder.--tune-twitter-placeholder.--tune-commentVisible {
+  background-color: #f5f8fa;
+  padding: 0px 12px 0px 16px;
+}
+
+:host[tune-state="filter"] .--tune-twitter-placeholder.--tune-commentVisible > .--tune-hiddenCommentWrapper {
+  overflow: visible; /** For twitter settings dropdown menu. */
+}
+
+:host[tune-state="filter"] .--tune-placeholder.--tune-twitter-placeholder:hover {
+  background-color: #f5f8fa;
+  box-shadow: none;
+}
+
+:host[tune-state="filter"] .--tune-twitter-placeholder .tweet {
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+.ThreadedConversation :host[tune-state="filter"] .--tune-twitter-placeholder .tweet {
+  padding-left: 22px;
+  padding-right: 28px;
+}
+
+.--tune-twitter-horizontalUIWrapper {
+  z-index: 2;
+  position: relative; /* z-index doesn't work without this. */
+  background-color: inherit;
+}
+
+/**
+ * Prevents the :after pseudo element from covering the avatar of tweet further
+ * down the stream. CSS selectors don't currently have enough complexity to make
+ * this specific to comments that are collapsed, because of the position in the
+ * DOM of ThreadedConversation-tweet elements relative to our component. However
+ * it doesn't seem like any bugs arise from having the z-index always be 0,
+ * though this is something to keep in mind.
+ */
+.ThreadedConversation-tweet:after {
+  z-index: 0;
+}

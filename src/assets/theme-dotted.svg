@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="130px" height="57px" viewBox="0 0 130 57" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 50.2 (55047) - http://www.bohemiancoding.com/sketch -->
+    <title>Group 4</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <path d="M11.8718214,7.49622586e-13 L140.420772,7.49622586e-13 L140.420772,57 L22.8237313,57 C20.6145923,57 18.8237313,55.209139 18.8237313,53 L18.8237313,5.40659341 L11.8718214,7.49622586e-13 Z" id="path-1"></path>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="themes-001" transform="translate(-35.000000, -182.000000)">
+            <g id="Group-4" transform="translate(24.000000, 182.000000)">
+                <path d="M2.87229446,0 L138.872294,0 C139.976864,-2.02906125e-16 140.872294,0.8954305 140.872294,2 L140.872294,55.4648438 C140.872294,56.5694132 139.976864,57.4648438 138.872294,57.4648438 L2.87229446,57.4648438 C1.76772496,57.4648438 0.872294457,56.5694132 0.872294457,55.4648438 L0.872294457,2 C0.872294457,0.8954305 1.76772496,2.02906125e-16 2.87229446,0 Z" id="Rectangle-25-Copy-5" fill-opacity="0" fill="#FFFFFF"></path>
+                <mask id="mask-2" fill="white">
+                    <use xlink:href="#path-1"></use>
+                </mask>
+                <use id="Rectangle-5" fill="#FFFFFF" transform="translate(76.146297, 28.500000) scale(1, -1) translate(-76.146297, -28.500000) " xlink:href="#path-1"></use>
+                <ellipse id="Combined-Shape-Copy" fill-opacity="0.38" fill="#000000" mask="url(#mask-2)" transform="translate(37.713937, 28.924419) rotate(-91.000000) translate(-37.713937, -28.924419) " cx="37.7139372" cy="28.9244193" rx="4.00612508" ry="4.01467856"></ellipse>
+            </g>
+        </g>
+    </g>
+</svg>

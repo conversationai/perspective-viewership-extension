@@ -1,0 +1,94 @@
+<!--
+  Copyright 2018 Google LLC
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<div class="container app"
+     tabindex="0"
+     [attr.style]="'--background-color:' + getBackgroundColor() | handleCustomStyle">
+
+  <tune-app-header #header
+                   role="banner"
+                   [ngClass]="{'hidden': feedbackVisible || settingsPage.learnMoreOpen || setupFlow.learnMoreOpen}"
+                   [showEnableSwitch]="!inSetupFlow"
+                   (titleClicked)="changeToAboutTab()">
+  </tune-app-header>
+
+  <tune-setup-flow #setupFlow [ngClass]="{'hidden': !inSetupFlow}"
+                   (setupComplete)="finishSetup()" class="fullHeight"></tune-setup-flow>
+
+  <mat-tab-group mat-stretch-tabs id="tabGroup"
+                 headerPosition="below"
+                 role="navigation"
+                 class="app-navigation"
+                 [ngClass]="{
+                   'hidden': feedbackVisible || settingsVisible || inSetupFlow,
+                   'inSetupFlow': inSetupFlow
+                 }"
+                 [attr.aria-hidden]="feedbackVisible || settingsVisible || inSetupFlow">
+    <mat-tab #knobTab label="Knob" aria-label="Main page tab">
+      <ng-template mat-tab-label class="fullWidthTab">
+        <mat-icon class="menuIcon" svgIcon="dial-icon"></mat-icon>
+      </ng-template>
+      <div class="page"
+           role="region"
+           [ngClass]="{'hidden': feedbackVisible || settingsVisible}"
+           [attr.aria-hidden]="feedbackVisible || settingsVisible">
+        <tune-knob-page #knobPage
+                        [settingsVisible]="settingsVisible"
+                        [tuneDisabled]="!header.enabled"
+                        [navigationTabs]="navigationTabs"
+                        [interactionDisabled]="!(header.enabled && knobTab.isActive)"
+                        (settingsButtonClicked)="onSettingsOpened($event)">
+        </tune-knob-page>
+      </div>
+    </mat-tab>
+
+    <mat-tab *ngIf="showThemes" label="Themes" class="fullWidthTab"
+             aria-label="Theme page tab">
+      <ng-template mat-tab-label>
+        <mat-icon class="menuIcon" svgIcon="brush-icon"></mat-icon>
+      </ng-template>
+      <div class="page" role="region"><tune-theme-page></tune-theme-page></div>
+    </mat-tab>
+
+    <mat-tab label="About" class="fullWidthTab" aria-label="About page tab">
+      <ng-template mat-tab-label>
+        <mat-icon class="menuIcon aboutIcon" svgIcon="about-icon"></mat-icon>
+      </ng-template>
+      <div class="page" role="region"><tune-about-page (showFeedbackClicked)="onFeedbackOpened()"></tune-about-page></div>
+    </mat-tab>
+  </mat-tab-group>
+
+  <!-- The settings page needs to be outside the mat-tab-group because it
+       contains its own mat-tab-group, and there are lots of bugs that
+       happen when mat-tab-groups are nested. -->
+  <div class="settings page fullHeight"
+       [ngClass]="{'hidden': !settingsVisible || settingsPage.learnMoreOpen}"
+       [attr.aria-hidden]="!settingsVisible || settingsPage.learnMoreOpen">
+    <tune-settings-page #settingsPage
+                        (settingsClosed)="onSettingsClosed()">
+    </tune-settings-page>
+  </div>
+  <div class="page fullHeight"
+       *ngIf="settingsVisible && settingsPage.learnMoreOpen">
+    <tune-attribute-info (backClicked)="settingsPage.learnMoreOpen = false"></tune-attribute-info>
+  </div>
+  <!-- Note: If we want to persist the feedback state after back is pressed, we
+       could use a hidden class here instead of *ngIf. But using *ngIf causes
+       fewer layout issues while managing the overlay screen options (settings
+       and feedback). -->
+  <div class="page fullHeight" *ngIf="feedbackVisible">
+    <tune-feedback-page (backClicked)="feedbackVisible = false"></tune-feedback-page>
+  </div>
+</div>

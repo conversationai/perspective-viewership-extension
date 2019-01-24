@@ -1,0 +1,9 @@
+{
+  "oauth2": {
+    "client_id": "< see README.md >",
+    "scopes": [
+      "https://www.googleapis.com/auth/userinfo.email"
+    ]
+  },
+  "key": "< see README.md >"
+}

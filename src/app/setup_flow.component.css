@@ -1,0 +1,92 @@
+/*
+ * Copyright 2018 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.container {
+  font-family: 'Roboto', sans-serif;
+  font-size: 16px;
+  height: 556px;
+  display: flex;
+  flex-direction: column;
+  position: absolute; /* Allows for pages to overlap during animations. */
+}
+
+.container.hidden {
+  display: none;
+}
+
+.container.moreInfo {
+  display: block;
+  height: 100%;
+}
+
+.container.moreInfo.hidden {
+  display: none;
+}
+
+.personalDataNotice {
+  color: rgba(255,255,255,0.60);
+  padding-left: 24px;
+  font-size: 14px;
+}
+
+.clickIconImageUrl {
+  width: 100%;
+}
+
+.animationPlaceholder {
+  text-align: center;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.bottomButtonWrapper {
+  font-family: Roboto, sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  text-align: center;
+  line-height: 18px;
+  background-color: #ffffff;
+  margin-top: auto;
+  width: 340px;
+  height: 56px;
+  display: flex;
+  align-content: center;
+  justify-content: center;
+}
+
+.bottomButton {
+  width: 100%;
+}
+
+/* TODO: Replace this with something that doesn't use position: absolute. This
+   is used on the bottom button on the auth page to make the button aligned to
+   the bottom of the pop-up. We use this hack becuase the large image on the
+   auth page would push the buttom off the bottom of the page, otherwise. */
+.bottomButtonWrapper.authPageHack {
+  position: absolute;
+  bottom: 0;
+}
+
+.title {
+  font-family: 'Google Sans', Arial, sans-serif;
+  font-size: 24px;
+  color: #FFFFFF;
+  line-height: 30px;
+  padding-top: 18px;
+  padding-left: 24px;
+  padding-right: 24px;
+  padding-bottom: 18px;
+}
