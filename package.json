@@ -18,6 +18,7 @@
     "dist_test": "npm run dist:base && node manifest_generate.js prod-test > dist/manifest.json",
     "dist": "npm run dist:base && node manifest_generate.js prod > dist/manifest.json",
     "package": "rm -f dist.zip && npm run dist && zip -r dist.zip dist",
+    "test:ci": "ng test popup customElements --watch=false",
     "test": "ng test",
     "lint": "ng lint"
   },
