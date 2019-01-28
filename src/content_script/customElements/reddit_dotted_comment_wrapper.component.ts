@@ -208,7 +208,7 @@ export class RedditDottedCommentWrapperComponent extends DottedCommentWrapperCom
     if (!this.changeDetectorRef['destroyed']) {
       this.changeDetectorRef.detectChanges();
     }
-    console.log('Collapsed!', this.elementRef.nativeElement);
+    console.log('Collapsed!');
   }
 
   handleCommentThreadExpanded() {
@@ -216,6 +216,6 @@ export class RedditDottedCommentWrapperComponent extends DottedCommentWrapperCom
     if (!this.changeDetectorRef['destroyed']) {
       this.changeDetectorRef.detectChanges();
     }
-    console.log('Expanded!', this.elementRef.nativeElement);
+    console.log('Expanded!');
   }
 }

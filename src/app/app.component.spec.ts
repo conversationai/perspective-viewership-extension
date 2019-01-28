@@ -58,7 +58,7 @@ describe('AppComponent', () => {
   beforeEach(async(() => {
     const googleAnalyticsServiceMock = {
       appendGaTrackingCode: (hostElement) => {
-        console.log('mock appendGaTrackingCode:', hostElement);
+        console.log('mock appendGaTrackingCode');
       },
       emitEvent: (eventCategory: string, eventAction: string,
                 eventLabel: string|null = null,
