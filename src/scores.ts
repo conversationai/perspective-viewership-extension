@@ -21,6 +21,7 @@
 
 // Attributes exposed to users in Tune settings.
 import * as tinygradient from 'tinygradient';
+import * as assert from 'assert';
 
 export type SettingAttributeName = 'identityAttack' | 'insult' | 'profanity' | 'threat' | 'sexuallyExplicit';
 export const SETTING_ATTRIBUTE_NAMES: Array<SettingAttributeName> = ['identityAttack', 'insult', 'profanity', 'threat', 'sexuallyExplicit'];
@@ -167,11 +168,6 @@ const HIDE_EVERYTHING_THRESHOLD = 0.01;
 // When threshold is high, we show everything.
 const SHOW_EVERYTHING_THRESHOLD = 0.99;
 
-// Returned by getHideCommentReason when the comment should be hidden, but
-// there's a non-specific reason why (e.g., user chose an extremely low
-// threshold, or the comment is missing scores).
-const EMPTY_ATTRIBUTE_SCORE: AttributeScore = { attribute: null, score: 0 };
-
 function allAttributesEnabled(enabledAttributes: EnabledAttributes): boolean {
   for (const attr in enabledAttributes) {
     if (!enabledAttributes[attr]) {
@@ -220,8 +216,13 @@ function getToxicityScore(scores: AttributeScores): AttributeScore|null {
 
 function maxEnabledAttributeScore(
   scores: AttributeScores,
-  enabledAttributes: EnabledAttributes)
+  enabledAttributes: EnabledAttributes,
+  subtypesEnabled: boolean)
 : AttributeScore|null {
+  if (!subtypesEnabled) {
+    return { attribute: 'toxicity', score: scores.toxicity };
+  }
+
   let currentMax: AttributeScore|null = null;
   for (const attributeKey of Object.keys(scores)) {
     const attribute = attributeKey as AttributeName;
@@ -247,10 +248,26 @@ export function linscale(
 }
 
 function shouldHideCommentDueToSevereToxicity(
-  severeToxicityScore: number, threshold: number)
-: boolean {
+  severeToxicityScore: number, maxAttributeScore: AttributeScore|null, threshold: number)
+: HideCommentDueToScores|null {
   const boundedThreshold = Math.max(threshold, BLARING_THRESHOLD);
-  return severeToxicityScore >= boundedThreshold;
+  if (severeToxicityScore < boundedThreshold) {
+    return null;
+  }
+
+  const status: HideCommentDueToScores = {
+    kind: 'hideCommentDueToScores',
+    attribute: 'severeToxicity',
+    scaledScore: severeToxicityScore,
+  };
+
+  if (maxAttributeScore !== null && maxAttributeScore.score >= LOUD_THRESHOLD) {
+    // If there's a high subtype attribute score, we use that as the attribute
+    // for display purposes.
+    status.attribute = maxAttributeScore.attribute;
+  }
+
+  return status;
 }
 
 // We map the ML probability score range (0.4, 1.0) to the Tune dial range
@@ -264,94 +281,126 @@ export function scaleEnabledAttributeScore(score: number) {
 }
 
 function shouldHideCommentDueToAttributeScore(
-  attributeScore: AttributeScore, threshold: number)
-: boolean {
-  if (threshold > BLARING_THRESHOLD) {
-    return false;
+  attributeScore: AttributeScore|null, threshold: number)
+: HideCommentDueToScores|null {
+  if (attributeScore === null || threshold > BLARING_THRESHOLD) {
+    return null;
   }
   const boundedThreshold = Math.max(threshold, LOW_THRESHOLD);
   const scaledScore = scaleEnabledAttributeScore(attributeScore.score);
-  return scaledScore >= boundedThreshold;
+  if (scaledScore < boundedThreshold) {
+    return null;
+  }
+  return {
+    kind: 'hideCommentDueToScores',
+    attribute: attributeScore.attribute,
+    scaledScore: scaledScore,
+  }
 }
 
-function shouldHideCommentDueToLowQuality(
-  scores: AttributeScores, threshold: number)
-: boolean {
+function shouldHideCommentDueToLowQuality(scores: AttributeScores, threshold: number)
+: HideCommentDueToScores|null {
   if (threshold > LOW_THRESHOLD) {
-    return false;
+    return null;
   }
-
   // Hack: Likely to reject is very sensitive, so we scale it down a bit.
   const scaledLikelyToReject = scores.likelyToReject * 0.6;
-
   // Show comments that have *either* low likelytoReject score (i.e. similar to
   // NYT-accepted comment), *or* low toxicity score (i.e. positive friendly
   // stuff). To hide a comment, both criteria need to fail.
-  return (scores.toxicity > threshold
-          && scaledLikelyToReject > threshold);
+  if (scores.toxicity < threshold || scaledLikelyToReject < threshold) {
+    return null;
+  }
+  return {
+    kind: 'hideCommentDueToScores',
+    attribute: 'toxicity',
+    scaledScore: scores.toxicity,
+  };
 }
 
-// Returns AttributeScore if comment with the given `scores` should be hidden,
-// given the `threshold` and `enabledAttributes`. Returns null if comment should
-// be shown.
+// Response type for whether a comment should be hidden.
+export type CommentVisibilityDecision =
+  ShowComment
+  | HideCommentDueToScores
+  | HideCommentDueToUnsupportedLanguage;
+
+export interface ShowComment {
+  kind: 'showComment';
+}
+
+export interface HideCommentDueToScores {
+  kind: 'hideCommentDueToScores';
+  attribute: AttributeName|null;
+  scaledScore: number;  // scaled score.
+}
+
+export interface HideCommentDueToUnsupportedLanguage {
+  kind: 'hideCommentDueToUnsupportedLanguage';
+}
+
+export const SHOW_COMMENT: ShowComment = { kind: 'showComment' };
+export const HIDE_COMMENT_DUE_TO_UNSUPPORTED_LANGUAGE: HideCommentDueToUnsupportedLanguage = {
+  kind: 'hideCommentDueToUnsupportedLanguage'
+};
+
+// Returned by getCommentVisibility when the comment should be hidden because
+// the user chose an extremely low threshold. This is a hack: since some
+// comments may have extremely low scores, the user may be confused that not all
+// comments are hidden when they set the threshold to what appears to be 0, but
+// isn't quite 0.
 //
-// If comment should be hidden, the returned AttributeScore contains the reason
-// why.
-//
-// TODO: link to cj's write-up of the intent/reasoning behind the filtering
-// logic.
-export function getHideCommentReason(
+// TODO: is this hack still needed?
+const HIDE_EVERYTHING_ATTRIBUTE_SCORE: HideCommentDueToScores =
+  { kind: 'hideCommentDueToScores',
+    attribute: null,
+    scaledScore: 0,
+  };
+
+// Determines whether a comment with the given `scores` should be hidden for the
+// given `threshold` and `enabledAttributes`.
+export function getCommentVisibility(
   scores: AttributeScores,
   threshold: number,
   enabledAttributes: EnabledAttributes,
   subtypesEnabled: boolean)
-: AttributeScore|null {
+: CommentVisibilityDecision {
   // TODO: enable strict null checking. should make this unnecessary.
   if (scores === null || scores === undefined) {
-    console.error('called with bad scores:', scores);
-    return null;
+    console.error('Error: called with null/undefined scores:', scores);
+    return SHOW_COMMENT;
   }
 
   if (threshold >= SHOW_EVERYTHING_THRESHOLD) {
-    return null;
+    return SHOW_COMMENT;
   }
 
   const missingScores = Object.keys(scores).length === 0;
   if (missingScores) {
     if (threshold < HIDE_COMMENTS_WITH_MISSING_SCORES_THRESHOLD) {
-      return EMPTY_ATTRIBUTE_SCORE;
+      return HIDE_COMMENT_DUE_TO_UNSUPPORTED_LANGUAGE;
     } else {
-      return null;
+      return SHOW_COMMENT;
     }
   }
 
-  const maxAttributeScore = maxEnabledAttributeScore(scores, enabledAttributes);
-  const toxicityScore = getToxicityScore(scores);
-  const severeToxicityScore = getSevereToxicityScore(scores);
+  const maxAttributeScore = maxEnabledAttributeScore(scores, enabledAttributes, subtypesEnabled);
 
-  const attributeScoreToUse = subtypesEnabled ? maxAttributeScore : toxicityScore;
+  const severeToxicityHideReason = shouldHideCommentDueToSevereToxicity(
+    scores.severeToxicity, maxAttributeScore, threshold);
+  if (severeToxicityHideReason !== null) { return severeToxicityHideReason; }
 
-  // Note: if scoring was successful, attributeScoreToUse shouldn't be null.
-  if (attributeScoreToUse !== null && severeToxicityScore !== null) {
-    if (shouldHideCommentDueToSevereToxicity(scores.severeToxicity, threshold)) {
-      // The severe toxicity score should be used with or without subtypes.
-      return severeToxicityScore;
-    } else if (shouldHideCommentDueToLowQuality(scores, threshold)) {
-      return attributeScoreToUse;
-    } else if (shouldHideCommentDueToAttributeScore(attributeScoreToUse, threshold)) {
-      // When determining whether to hide a comment due to enabled attribute
-      // score, we use a scaled score. This updates the returned AttributeScore
-      // value to match that scaled score.
-      attributeScoreToUse.score = scaleEnabledAttributeScore(attributeScoreToUse.score);
-      return attributeScoreToUse;
-    }
-  }
+  const attributeScoreHideReason = shouldHideCommentDueToAttributeScore(
+    maxAttributeScore, threshold);
+  if (attributeScoreHideReason !== null) { return attributeScoreHideReason; }
+
+  const lowQualityHideReason = shouldHideCommentDueToLowQuality(scores, threshold);
+  if (lowQualityHideReason !== null) { return lowQualityHideReason; }
 
   if (threshold <= HIDE_EVERYTHING_THRESHOLD) {
-    return EMPTY_ATTRIBUTE_SCORE;
+    return HIDE_EVERYTHING_ATTRIBUTE_SCORE;
   }
 
-  return null;
+  return SHOW_COMMENT;
 }
 
 // Note: these include trailing spaces so we can concatenate directly with
@@ -377,29 +426,43 @@ function attributeWithPrefix(attribute: string): string {
   }
 }
 
-// Returns text description of the hideCommentReason to be displayed to the
-// user.
-export function getHideReasonDescription(hideCommentReason: AttributeScore): string {
-  if (hideCommentReason.score >= BLARING_THRESHOLD) {
-    return 'Blaring';
-  } else if (hideCommentReason.score >= LOUD_THRESHOLD) {
-    return 'Loud';
-  } else if (hideCommentReason.score >= MEDIUM_THRESHOLD) {
-    return 'Medium';
-  } else if (hideCommentReason.score >= LOW_THRESHOLD) {
-    return 'Low';
+function assertNever(x: never): never {
+    throw new Error("Unexpected object: " + x);
+}
+
+// Returns text description of the CommentVisibilityDescription to be displayed
+// to the user.
+export function getHideReasonDescription(commentVisibility: CommentVisibilityDecision): string {
+  if (commentVisibility.kind === 'showComment') {
+    return '';
+  } else if (commentVisibility.kind === 'hideCommentDueToUnsupportedLanguage') {
+    return "Tune doesn't current support this language.";
   } else {
-    return 'Quiet';
+    assert(commentVisibility.kind === 'hideCommentDueToScores');
+    if (commentVisibility.scaledScore >= BLARING_THRESHOLD) {
+      return 'Blaring';
+    } else if (commentVisibility.scaledScore >= LOUD_THRESHOLD) {
+      return 'Loud';
+    } else if (commentVisibility.scaledScore >= MEDIUM_THRESHOLD) {
+      return 'Medium';
+    } else if (commentVisibility.scaledScore >= LOW_THRESHOLD) {
+      return 'Low';
+    } else {
+      return 'Quiet';
+    }
   }
 }
 
-export function getFeedbackQuestion(hideCommentReason: AttributeScore,
-                                    subtypesEnabled: boolean): string {
-  // TODO: do we want to use a different threshold here? is it okay to
-  // mention the attribute when the confidence is not particularly high?
-  if (subtypesEnabled && hideCommentReason.score >= LOUD_THRESHOLD) {
-    return 'Is this ' + attributeWithPrefix(hideCommentReason.attribute) + '?';
-  } else {
-    return 'Should this be hidden?';
+export function getFeedbackQuestion(commentVisibility: CommentVisibilityDecision,
+                                    subtypesEnabled: boolean)
+: string {
+  if (commentVisibility.kind === 'showComment') {
+    return '';
   }
+  if (subtypesEnabled && commentVisibility.kind === 'hideCommentDueToScores') {
+    if (commentVisibility.scaledScore >= LOUD_THRESHOLD) {
+      return 'Is this ' + attributeWithPrefix(commentVisibility.attribute) + '?';
+    }
+  }
+  return 'Should this be hidden?';
 }

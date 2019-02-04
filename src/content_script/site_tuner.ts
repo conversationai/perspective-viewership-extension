@@ -16,8 +16,8 @@
 // (This is defined separately here, and not in content_script.ts, to avoid
 // circular dependency issues.)
 
-import { AttributeScores, AttributeScore, EnabledAttributes, getHideCommentReason,
-         getHideReasonDescription, getFeedbackQuestion } from '../scores';
+import { CommentVisibilityDecision, AttributeScores, AttributeScore, EnabledAttributes,
+         getCommentVisibility, getHideReasonDescription, getFeedbackQuestion } from '../scores';
 import { EnabledWebsites, ThemeType, THEMES } from '../tune_settings';
 import { ChromeMessageEnum } from '../messages';
 
@@ -396,30 +396,31 @@ export abstract class SiteTuner {
   private setCommentVisibility(wrapperComponent: Element, threshold: number,
                                enabledAttributes: EnabledAttributes, subtypesEnabled: boolean) {
     const scores = safeParse(wrapperComponent.getAttribute(WRAPPER_SCORES_ATTR));
-    // TODO: I don't think this happens in practice, consider removing.
     if (scores === undefined) {
       console.error('BUG: invalid scores? skipping comment:', scores, wrapperComponent);
     }
-    const hideCommentReason: AttributeScore|null = getHideCommentReason(
+
+    const commentVisibility: CommentVisibilityDecision = getCommentVisibility(
       scores, threshold, enabledAttributes, subtypesEnabled);
-    wrapperComponent.setAttribute(WRAPPER_TUNE_STATE_ATTR,
-                                  hideCommentReason ? TUNE_STATE.filter : TUNE_STATE.show);
-    wrapperComponent.setAttribute(WRAPPER_MAX_ATTRIBUTE_NAME_ATTR,
-                                  hideCommentReason ? hideCommentReason.attribute : '');
+
+    if (commentVisibility.kind === 'showComment') {
+      wrapperComponent.setAttribute(WRAPPER_TUNE_STATE_ATTR, TUNE_STATE.show);
+    } else {
+      wrapperComponent.setAttribute(WRAPPER_TUNE_STATE_ATTR, TUNE_STATE.filter);
+      if (commentVisibility.kind === 'hideCommentDueToScores') {
+        wrapperComponent.setAttribute(WRAPPER_MAX_ATTRIBUTE_NAME_ATTR, commentVisibility.attribute);
+      }
+    }
 
     if (this.theme === THEMES.dotted) {
-      let filterMessage, feedbackQuestion;
-      if (hideCommentReason) {
+      wrapperComponent.setAttribute(WRAPPER_FILTER_MESSAGE_ATTR,
+                                    getHideReasonDescription(commentVisibility));
+      wrapperComponent.setAttribute(WRAPPER_FEEDBACK_QUESTION_ATTR,
+                                    getFeedbackQuestion(commentVisibility, this.subtypesEnabled));
+      if (commentVisibility.kind === 'hideCommentDueToScores') {
         wrapperComponent.setAttribute(WRAPPER_MAX_ATTRIBUTE_SCORE_ATTR,
-                                      String(hideCommentReason.score));
-        filterMessage = getHideReasonDescription(hideCommentReason);
-        feedbackQuestion = getFeedbackQuestion(hideCommentReason, this.subtypesEnabled);
-      } else {
-        filterMessage = '';
-        feedbackQuestion = '';
+                                      String(commentVisibility.scaledScore));
       }
-      wrapperComponent.setAttribute(WRAPPER_FILTER_MESSAGE_ATTR, filterMessage);
-      wrapperComponent.setAttribute(WRAPPER_FEEDBACK_QUESTION_ATTR, feedbackQuestion);
     }
   }
 
