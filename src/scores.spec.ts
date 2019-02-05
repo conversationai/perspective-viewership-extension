@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { AttributeScores, AttributeScore, EnabledAttributes,
-         linscale, getHideCommentReason,
+         linscale, getCommentVisibility,
          getHideReasonDescription, getFeedbackQuestion,
          scaleEnabledAttributeScore } from './scores';
 
@@ -65,41 +65,41 @@ describe('linscale', () => {
   });
 });
 
-describe('getHideCommentReason', () => {
+describe('getCommentVisibility', () => {
 
   describe('check severe toxicity', () => {
     it('should hide severe toxicity with subtypes enabled', () => {
       const scores = zeroScores();
       scores.severeToxicity = 0.9;
-      const reason = getHideCommentReason(
+      const decision = getCommentVisibility(
         scores, 0.85, allEnabled(), true /* subtypesEnabled */);
-      expect(reason).not.toBe(null);
-      expect(reason.attribute).toBe('severeToxicity');
+      expect(decision).toEqual(
+        {kind:'hideCommentDueToScores', attribute:'severeToxicity', scaledScore: 0.9});
     });
 
     it('should hide severe toxicity without subtypes enabled', () => {
       const scores = zeroScores();
       scores.severeToxicity = 0.9;
-      const reason = getHideCommentReason(
+      const decision = getCommentVisibility(
         scores, 0.85, allEnabled(), false /* subtypesEnabled */);
-      expect(reason).not.toBe(null);
-      expect(reason.attribute).toBe('severeToxicity');
+      expect(decision).toEqual(
+        {kind:'hideCommentDueToScores', attribute:'severeToxicity', scaledScore: 0.9});
     });
 
     it('should show low severe toxicity with subtypes enabled', () => {
       const scores = zeroScores();
       scores.severeToxicity = 0.6;
-      const reason = getHideCommentReason(
+      const decision = getCommentVisibility(
         scores, 0.9, allEnabled(), true /* subtypesEnabled */);
-      expect(reason).toBe(null);
+      expect(decision).toEqual({kind:'showComment'});
     });
 
     it('should show low severe toxicity without subtypes enabled', () => {
       const scores = zeroScores();
       scores.severeToxicity = 0.6;
-      const reason = getHideCommentReason(
+      const decision = getCommentVisibility(
         scores, 0.9, allEnabled(), false /* subtypesEnabled */);
-      expect(reason).toBe(null);
+      expect(decision).toEqual({kind:'showComment'});
     });
   });
 
@@ -112,14 +112,13 @@ describe('getHideCommentReason', () => {
       // filtering logic.
       scores.likelyToReject = 0.5;
       scores.insult = 0.1;
-      const reason = getHideCommentReason(
+      const decision = getCommentVisibility(
         scores, 0.15, allEnabled(), true /* subtypesEnabled */);
-      expect(reason).not.toBe(null);
       // Even though the likelyToReject and toxicity scores are higher, we only
       // return the highest user-facing attribute, which in this case is
-      // 'insult'.
-      expect(reason.attribute).toBe('insult');
-      expect(reason.score).toBe(0.1);
+      // 'insult'. We always use the toxicity score though.
+      expect(decision).toEqual(
+        {kind:'hideCommentDueToScores', attribute:'insult', scaledScore: 0.2});
     });
 
     it('should hide low quality without subtypes enabled', () => {
@@ -130,14 +129,13 @@ describe('getHideCommentReason', () => {
       // filtering logic.
       scores.likelyToReject = 0.5;
       scores.insult = 0.1;
-      const reason = getHideCommentReason(
+      const decision = getCommentVisibility(
         scores, 0.15, allEnabled(), false /* subtypesEnabled */);
-      expect(reason).not.toBe(null);
       // Even though the likelyToReject and toxicity scores are higher, we only
       // return the highest user-facing attribute, which in this case is
       // 'toxicity'.
-      expect(reason.attribute).toBe('toxicity');
-      expect(reason.score).toBe(0.2);
+      expect(decision).toEqual(
+        {kind:'hideCommentDueToScores', attribute:'toxicity', scaledScore: 0.2});
     });
 
     it('should show high quality with subtypes enabled', () => {
@@ -145,9 +143,9 @@ describe('getHideCommentReason', () => {
       scores.toxicity = 0.2;
       scores.likelyToReject = 0.05;
       scores.insult = 0.1;
-      const reason = getHideCommentReason(
+      const decision = getCommentVisibility(
         scores, 0.15, allEnabled(), true /* subtypesEnabled */);
-      expect(reason).toBe(null);
+      expect(decision).toEqual({kind:'showComment'});
     });
 
     it('should show high quality without subtypes enabled', () => {
@@ -155,27 +153,27 @@ describe('getHideCommentReason', () => {
       scores.toxicity = 0.2;
       scores.likelyToReject = 0.05;
       scores.insult = 0.1;
-      const reason = getHideCommentReason(
+      const decision = getCommentVisibility(
         scores, 0.15, allEnabled(), false /* subtypesEnabled */);
-      expect(reason).toBe(null);
+      expect(decision).toEqual({kind:'showComment'});
     });
 
     it('should show low toxicity with subtypes enabled', () => {
       const scores = zeroScores();
       scores.toxicity = 0.03;
       scores.likelyToReject = 0.99;
-      const reason = getHideCommentReason(
+      const decision = getCommentVisibility(
         scores, 0.15, allEnabled(), true /* subtypesEnabled */);
-      expect(reason).toBe(null);
+      expect(decision).toEqual({kind:'showComment'});
     });
 
     it('should show low toxicity without subtypes enabled', () => {
       const scores = zeroScores();
       scores.toxicity = 0.03;
       scores.likelyToReject = 0.99;
-      const reason = getHideCommentReason(
+      const decision = getCommentVisibility(
         scores, 0.15, allEnabled(), false /* subtypesEnabled */);
-      expect(reason).toBe(null);
+      expect(decision).toEqual({kind:'showComment'});
     });
   });
 
@@ -185,11 +183,11 @@ describe('getHideCommentReason', () => {
       scores.profanity = 1.0;
       const enabled = allDisabled();
       enabled.profanity = true;
-      const reason = getHideCommentReason(
+      const decision = getCommentVisibility(
         scores, 0.6, enabled, true /* subtypesEnabled */);
-      expect(reason).not.toBe(null);
-      expect(reason.attribute).toBe('profanity');
-      expect(reason.score).toBe(scaleEnabledAttributeScore(1.0));
+      expect(decision).toEqual(
+        {kind:'hideCommentDueToScores', attribute:'profanity',
+         scaledScore: scaleEnabledAttributeScore(1.0)});
     });
 
     it('should ignore higher score from disabled attribute', () => {
@@ -199,11 +197,11 @@ describe('getHideCommentReason', () => {
       scores.insult = 0.90;
       const enabled = allDisabled();
       enabled.insult = true;
-      const reason = getHideCommentReason(
+      const decision = getCommentVisibility(
         scores, 0.5, enabled, true /* subtypesEnabled */);
-      expect(reason).not.toBe(null);
-      expect(reason.attribute).toBe('insult');
-      expect(reason.score).toBeCloseTo(scaleEnabledAttributeScore(0.90));
+      expect(decision).toEqual(
+        {kind:'hideCommentDueToScores', attribute:'insult',
+         scaledScore: scaleEnabledAttributeScore(0.90)});
     });
 
     it('should give highest enabled score', () => {
@@ -213,11 +211,11 @@ describe('getHideCommentReason', () => {
       const enabled = allDisabled();
       enabled.profanity = true;
       enabled.insult = true;
-      const reason = getHideCommentReason(
+      const decision = getCommentVisibility(
         scores, 0.5, enabled, true /* subtypesEnabled */);
-      expect(reason).not.toBe(null);
-      expect(reason.attribute).toBe('profanity');
-      expect(reason.score).toBeCloseTo(scaleEnabledAttributeScore(0.8));
+      expect(decision).toEqual(
+        {kind:'hideCommentDueToScores', attribute:'profanity',
+         scaledScore: scaleEnabledAttributeScore(0.8)});
     });
 
     it('should use toxicity score when subtypes are not enabled', () => {
@@ -227,11 +225,11 @@ describe('getHideCommentReason', () => {
       scores.insult = 0.90;
       const enabled = allDisabled();
       enabled.insult = true;
-      const reason = getHideCommentReason(
+      const decision = getCommentVisibility(
         scores, 0.5, enabled, false /* subtypesEnabled */);
-      expect(reason).not.toBe(null);
-      expect(reason.attribute).toBe('toxicity');
-      expect(reason.score).toBeCloseTo(scaleEnabledAttributeScore(0.80));
+      expect(decision).toEqual(
+        {kind:'hideCommentDueToScores', attribute:'toxicity',
+         scaledScore: scaleEnabledAttributeScore(0.80)});
     });
   });
 
@@ -239,104 +237,142 @@ describe('getHideCommentReason', () => {
 
 describe('getHideDescription', () => {
   it('should say "Blaring" for high score values', () => {
-    expect(getHideReasonDescription({attribute: 'insult', score: 0.9}))
+    expect(getHideReasonDescription(
+      {kind: 'hideCommentDueToScores', attribute: 'insult', scaledScore: 0.9}))
       .toBe('Blaring');
-    expect(getHideReasonDescription({attribute: 'profanity', score: 0.88}))
+    expect(getHideReasonDescription(
+      {kind: 'hideCommentDueToScores', attribute: 'profanity', scaledScore: 0.88}))
       .toBe('Blaring');
-    expect(getHideReasonDescription({attribute: 'identityAttack', score: 0.87}))
+    expect(getHideReasonDescription(
+      {kind: 'hideCommentDueToScores', attribute: 'identityAttack', scaledScore: 0.87}))
       .toBe('Blaring');
-    expect(getHideReasonDescription({attribute: 'severeToxicity', score: 0.90}))
+    expect(getHideReasonDescription(
+      {kind: 'hideCommentDueToScores', attribute: 'severeToxicity', scaledScore: 0.90}))
       .toBe('Blaring');
   });
 
   it('should say "Loud" with medium-high score values', () => {
-    expect(getHideReasonDescription({attribute: 'insult', score: 0.80}))
+    expect(getHideReasonDescription(
+      {kind: 'hideCommentDueToScores', attribute: 'insult', scaledScore: 0.80}))
       .toBe('Loud');
-    expect(getHideReasonDescription({attribute: 'threat', score: 0.75}))
+    expect(getHideReasonDescription(
+      {kind: 'hideCommentDueToScores', attribute: 'threat', scaledScore: 0.75}))
       .toBe('Loud');
-    expect(getHideReasonDescription({attribute: 'sexuallyExplicit', score: 0.70}))
+    expect(getHideReasonDescription(
+      {kind: 'hideCommentDueToScores', attribute: 'sexuallyExplicit', scaledScore: 0.70}))
       .toBe('Loud');
   });
 
   it('should say "Medium" with middle score values', () => {
-    expect(getHideReasonDescription({attribute: 'severeToxicity', score: 0.60}))
+    expect(getHideReasonDescription(
+      {kind: 'hideCommentDueToScores', attribute: 'severeToxicity', scaledScore: 0.60}))
       .toBe('Medium');
-    expect(getHideReasonDescription({attribute: 'insult', score: 0.50}))
+    expect(getHideReasonDescription(
+      {kind: 'hideCommentDueToScores', attribute: 'insult', scaledScore: 0.50}))
       .toBe('Medium');
-    expect(getHideReasonDescription({attribute: 'threat', score: 0.45}))
+    expect(getHideReasonDescription(
+      {kind: 'hideCommentDueToScores', attribute: 'threat', scaledScore: 0.45}))
       .toBe('Medium');
-    expect(getHideReasonDescription({attribute: 'sexuallyExplicit', score: 0.40}))
+    expect(getHideReasonDescription(
+      {kind: 'hideCommentDueToScores', attribute: 'sexuallyExplicit', scaledScore: 0.40}))
       .toBe('Medium');
   });
 
   it('should say "Low" for medium-low score values', () => {
-    expect(getHideReasonDescription({attribute: 'threat', score: 0.35}))
+    expect(getHideReasonDescription(
+      {kind: 'hideCommentDueToScores', attribute: 'threat', scaledScore: 0.35}))
       .toBe('Low');
-    expect(getHideReasonDescription({attribute: 'threat', score: 0.20}))
+    expect(getHideReasonDescription(
+      {kind: 'hideCommentDueToScores', attribute: 'threat', scaledScore: 0.20}))
       .toBe('Low');
-    expect(getHideReasonDescription({attribute: 'identityAttack', score: 0.18}))
+    expect(getHideReasonDescription(
+      {kind: 'hideCommentDueToScores', attribute: 'identityAttack', scaledScore: 0.18}))
       .toBe('Low');
   });
 
   it('should say "Quiet" for very low score values', () => {
-    expect(getHideReasonDescription({attribute: 'threat', score: 0.10}))
+    expect(getHideReasonDescription(
+      {kind: 'hideCommentDueToScores', attribute: 'threat', scaledScore: 0.10}))
       .toBe('Quiet');
-    expect(getHideReasonDescription({attribute: 'identityAttack', score: 0.13}))
+    expect(getHideReasonDescription(
+      {kind: 'hideCommentDueToScores', attribute: 'identityAttack', scaledScore: 0.13}))
       .toBe('Quiet');
-    expect(getHideReasonDescription({attribute: null, score: 0.0}))
+    expect(getHideReasonDescription(
+      {kind: 'hideCommentDueToScores', attribute: null, scaledScore: 0.0}))
       .toBe('Quiet');
+  });
+
+  it('should be empty for showComment', () => {
+    expect(getHideReasonDescription({kind: 'showComment'})).toBe('');
+  });
+
+  it('should show unsupported-language message', () => {
+    expect(getHideReasonDescription({kind: 'hideCommentDueToUnsupportedLanguage'}))
+      .toBe("Tune doesn't current support this language.");
   });
 });
 
 describe('getFeedbackQuestion', () => {
   it('should mention the subtype when we have higher scores with subtypes enabled', () => {
     expect(getFeedbackQuestion(
-      {attribute: 'insult', score: 0.9}, true /* subtypesEnabled */))
+      {kind: 'hideCommentDueToScores', attribute: 'insult', scaledScore: 0.9}, true /* subtypesEnabled */))
       .toBe('Is this an insult?');
     expect(getFeedbackQuestion(
-      {attribute: 'profanity', score: 0.8}, true /* subtypesEnabled */))
+      {kind: 'hideCommentDueToScores', attribute: 'profanity', scaledScore: 0.8}, true /* subtypesEnabled */))
       .toBe('Is this profanity?');
     expect(getFeedbackQuestion(
-      {attribute: 'identityAttack', score: 0.75}, true /* subtypesEnabled */))
+      {kind: 'hideCommentDueToScores', attribute: 'identityAttack', scaledScore: 0.75}, true /* subtypesEnabled */))
       .toBe('Is this an attack on identity?');
     expect(getFeedbackQuestion(
-      {attribute: 'severeToxicity', score: 0.70}, true /* subtypesEnabled */))
+      {kind: 'hideCommentDueToScores', attribute: 'severeToxicity', scaledScore: 0.70}, true /* subtypesEnabled */))
       .toBe('Is this toxic?');
     expect(getFeedbackQuestion(
-      {attribute: 'toxicity', score: 0.70}, true /* subtypesEnabled */))
+      {kind: 'hideCommentDueToScores', attribute: 'toxicity', scaledScore: 0.70}, true /* subtypesEnabled */))
       .toBe('Is this toxic?');
   });
 
   it('should just ask "should this be hidden" when we have higher scores without subtypes enabled', () => {
     expect(getFeedbackQuestion(
-      {attribute: 'severeToxicity', score: 0.9}, false /* subtypesEnabled */))
+      {kind: 'hideCommentDueToScores', attribute: 'severeToxicity', scaledScore: 0.9}, false /* subtypesEnabled */))
       .toBe('Should this be hidden?');
     expect(getFeedbackQuestion(
-      {attribute: 'insult', score: 0.8}, false /* subtypesEnabled */))
+      {kind: 'hideCommentDueToScores', attribute: 'insult', scaledScore: 0.8}, false /* subtypesEnabled */))
       .toBe('Should this be hidden?');
     expect(getFeedbackQuestion(
-      {attribute: 'threat', score: 0.75}, false /* subtypesEnabled */))
+      {kind: 'hideCommentDueToScores', attribute: 'threat', scaledScore: 0.75}, false /* subtypesEnabled */))
       .toBe('Should this be hidden?');
     expect(getFeedbackQuestion(
-      {attribute: 'toxicity', score: 0.7}, false /* subtypesEnabled */))
+      {kind: 'hideCommentDueToScores', attribute: 'toxicity', scaledScore: 0.7}, false /* subtypesEnabled */))
       .toBe('Should this be hidden?');
   });
 
   it('should just ask "should this be hidden" for middle and low score values', () => {
     expect(getFeedbackQuestion(
-      {attribute: 'severeToxicity', score: 0.60}, true /* subtypesEnabled */))
+      {kind: 'hideCommentDueToScores', attribute: 'severeToxicity', scaledScore: 0.60}, true /* subtypesEnabled */))
       .toBe('Should this be hidden?');
     expect(getFeedbackQuestion(
-      {attribute: 'insult', score: 0.50}, true /* subtypesEnabled */))
+      {kind: 'hideCommentDueToScores', attribute: 'insult', scaledScore: 0.50}, true /* subtypesEnabled */))
       .toBe('Should this be hidden?');
     expect(getFeedbackQuestion(
-      {attribute: 'threat', score: 0.10}, true /* subtypesEnabled */))
+      {kind: 'hideCommentDueToScores', attribute: 'threat', scaledScore: 0.10}, true /* subtypesEnabled */))
       .toBe('Should this be hidden?');
     expect(getFeedbackQuestion(
-      {attribute: 'sexuallyExplicit', score: 0.05}, true /* subtypesEnabled */))
+      {kind: 'hideCommentDueToScores', attribute: 'sexuallyExplicit', scaledScore: 0.05}, true /* subtypesEnabled */))
       .toBe('Should this be hidden?');
     expect(getFeedbackQuestion(
-      {attribute: 'toxicity', score: 0.05}, true /* subtypesEnabled */))
+      {kind: 'hideCommentDueToScores', attribute: 'toxicity', scaledScore: 0.05}, true /* subtypesEnabled */))
+      .toBe('Should this be hidden?');
+  });
+
+  it('should be empty for showComment', () => {
+    expect(getFeedbackQuestion({kind: 'showComment'}, true)).toBe('');
+    expect(getFeedbackQuestion({kind: 'showComment'}, false)).toBe('');
+  });
+
+  it('should show generic message for unsupported-language comments', () => {
+    expect(getFeedbackQuestion({kind: 'hideCommentDueToUnsupportedLanguage'}, true))
+      .toBe('Should this be hidden?');
+    expect(getFeedbackQuestion({kind: 'hideCommentDueToUnsupportedLanguage'}, false))
       .toBe('Should this be hidden?');
   });
 });
