@@ -308,7 +308,7 @@ describe('getHideDescription', () => {
 
   it('should show unsupported-language message', () => {
     expect(getHideReasonDescription({kind: 'hideCommentDueToUnsupportedLanguage'}))
-      .toBe('Tune doesn\'t current support this language.');
+      .toBe('Tune doesn\'t currently support this language.');
   });
 });
 

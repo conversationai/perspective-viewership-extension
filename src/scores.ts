@@ -438,7 +438,7 @@ export function getHideReasonDescription(commentVisibility: CommentVisibilityDec
   if (commentVisibility.kind === 'showComment') {
     return '';
   } else if (commentVisibility.kind === 'hideCommentDueToUnsupportedLanguage') {
-    return 'Tune doesn\'t current support this language.';
+    return 'Tune doesn\'t currently support this language.';
   } else {
     assert(commentVisibility.kind === 'hideCommentDueToScores');
     if (commentVisibility.scaledScore >= BLARING_THRESHOLD) {
