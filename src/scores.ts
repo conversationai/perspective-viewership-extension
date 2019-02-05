@@ -123,13 +123,9 @@ export const ATTRIBUTE_NAME_MAP: AttributeToString = {
   'sexuallyExplicit': 'Sexually explicit',
   'toxicity': 'Toxic',
   'severeToxicity': 'Toxic',
-  // TODO: We need to decide if we want to show this to users or not.
-  // Leaving in for now to aid in debugging.
+  // NOTE: this shouldn't be displayed to users.
   'likelyToReject': 'Low quality',
 };
-
-// TODO: refactor all this code once we're more confident in the logic
-// we want here.
 
 // 0 to 0.15: quiet
 // 0.15 to 0.38: low
@@ -160,13 +156,7 @@ export function colorGradient(threshold: number): string {
 
 // When we don't know the scores (typically due to unsupported language), we
 // hide the comments when the threshold is below this level.
-const HIDE_COMMENTS_WITH_MISSING_SCORES_THRESHOLD = 0.3;
-
-// When threshold is low, we hide everything.
-const HIDE_EVERYTHING_THRESHOLD = 0.01;
-
-// When threshold is high, we show everything.
-const SHOW_EVERYTHING_THRESHOLD = 0.99;
+const HIDE_COMMENTS_IN_UNSUPPORTED_LANGUAGE_THRESHOLD = 0.3;
 
 function allAttributesEnabled(enabledAttributes: EnabledAttributes): boolean {
   for (const attr in enabledAttributes) {
@@ -197,21 +187,6 @@ function shouldConsiderAttribute(attribute: AttributeName, enabledAttributes: En
     return true;
   }
   return false;
-}
-
-function getSevereToxicityScore(scores: AttributeScores): AttributeScore|null {
-  if (scores.severeToxicity === null) {
-    return null;
-  }
-  return {attribute: 'severeToxicity', score: scores.severeToxicity};
-
-}
-
-function getToxicityScore(scores: AttributeScores): AttributeScore|null {
-  if (scores.toxicity === null) {
-    return null;
-  }
-  return {attribute: 'toxicity', score: scores.toxicity};
 }
 
 function maxEnabledAttributeScore(
@@ -324,42 +299,27 @@ function shouldHideCommentDueToLowQuality(
 }
 
 // Response type for whether a comment should be hidden.
+// CommentVisibilityDecision is a "discriminated union" type, following the
+// pattern described here:
+// https://www.typescriptlang.org/docs/handbook/advanced-types.html
 export type CommentVisibilityDecision =
   ShowComment
   | HideCommentDueToScores
   | HideCommentDueToUnsupportedLanguage;
 
-export interface ShowComment {
+interface HideCommentDueToScores {
+  kind: 'hideCommentDueToScores';
+  attribute: AttributeName;
+  scaledScore: number;
+}
+
+interface ShowComment {
   kind: 'showComment';
 }
 
-export interface HideCommentDueToScores {
-  kind: 'hideCommentDueToScores';
-  attribute: AttributeName|null;
-  scaledScore: number;  // scaled score.
-}
-
-export interface HideCommentDueToUnsupportedLanguage {
+interface HideCommentDueToUnsupportedLanguage {
   kind: 'hideCommentDueToUnsupportedLanguage';
 }
-
-export const SHOW_COMMENT: ShowComment = { kind: 'showComment' };
-export const HIDE_COMMENT_DUE_TO_UNSUPPORTED_LANGUAGE: HideCommentDueToUnsupportedLanguage = {
-  kind: 'hideCommentDueToUnsupportedLanguage'
-};
-
-// Returned by getCommentVisibility when the comment should be hidden because
-// the user chose an extremely low threshold. This is a hack: since some
-// comments may have extremely low scores, the user may be confused that not all
-// comments are hidden when they set the threshold to what appears to be 0, but
-// isn't quite 0.
-//
-// TODO: is this hack still needed?
-const HIDE_EVERYTHING_ATTRIBUTE_SCORE: HideCommentDueToScores = {
-  kind: 'hideCommentDueToScores',
-  attribute: null,
-  scaledScore: 0,
-};
 
 // Determines whether a comment with the given `scores` should be hidden for the
 // given `threshold` and `enabledAttributes`.
@@ -369,22 +329,21 @@ export function getCommentVisibility(
   enabledAttributes: EnabledAttributes,
   subtypesEnabled: boolean)
 : CommentVisibilityDecision {
+  const show_comment: CommentVisibilityDecision = { kind: 'showComment' };
+
   // TODO: enable strict null checking. should make this unnecessary.
   if (scores === null || scores === undefined) {
     console.error('Error: called with null/undefined scores:', scores);
-    return SHOW_COMMENT;
+    return show_comment;
   }
 
-  if (threshold >= SHOW_EVERYTHING_THRESHOLD) {
-    return SHOW_COMMENT;
-  }
-
-  const missingScores = Object.keys(scores).length === 0;
-  if (missingScores) {
-    if (threshold < HIDE_COMMENTS_WITH_MISSING_SCORES_THRESHOLD) {
-      return HIDE_COMMENT_DUE_TO_UNSUPPORTED_LANGUAGE;
+  // Missing scores is ~always due to unsupported language.
+  const unsupportedLanguage = Object.keys(scores).length === 0;
+  if (unsupportedLanguage) {
+    if (threshold < HIDE_COMMENTS_IN_UNSUPPORTED_LANGUAGE_THRESHOLD) {
+      return {kind: 'hideCommentDueToUnsupportedLanguage'};
     } else {
-      return SHOW_COMMENT;
+      return show_comment;
     }
   }
 
@@ -402,11 +361,7 @@ export function getCommentVisibility(
     scores, maxAttributeScore, threshold);
   if (lowQualityHideReason !== null) { return lowQualityHideReason; }
 
-  if (threshold <= HIDE_EVERYTHING_THRESHOLD) {
-    return HIDE_EVERYTHING_ATTRIBUTE_SCORE;
-  }
-
-  return SHOW_COMMENT;
+  return show_comment;
 }
 
 // Note: these include trailing spaces so we can concatenate directly with
