@@ -295,7 +295,7 @@ function shouldHideCommentDueToAttributeScore(
     kind: 'hideCommentDueToScores',
     attribute: attributeScore.attribute,
     scaledScore: scaledScore,
-  }
+  };
 }
 
 function shouldHideCommentDueToLowQuality(
@@ -355,11 +355,11 @@ export const HIDE_COMMENT_DUE_TO_UNSUPPORTED_LANGUAGE: HideCommentDueToUnsupport
 // isn't quite 0.
 //
 // TODO: is this hack still needed?
-const HIDE_EVERYTHING_ATTRIBUTE_SCORE: HideCommentDueToScores =
-  { kind: 'hideCommentDueToScores',
-    attribute: null,
-    scaledScore: 0,
-  };
+const HIDE_EVERYTHING_ATTRIBUTE_SCORE: HideCommentDueToScores = {
+  kind: 'hideCommentDueToScores',
+  attribute: null,
+  scaledScore: 0,
+};
 
 // Determines whether a comment with the given `scores` should be hidden for the
 // given `threshold` and `enabledAttributes`.
@@ -432,17 +432,13 @@ function attributeWithPrefix(attribute: string): string {
   }
 }
 
-function assertNever(x: never): never {
-    throw new Error("Unexpected object: " + x);
-}
-
 // Returns text description of the CommentVisibilityDescription to be displayed
 // to the user.
 export function getHideReasonDescription(commentVisibility: CommentVisibilityDecision): string {
   if (commentVisibility.kind === 'showComment') {
     return '';
   } else if (commentVisibility.kind === 'hideCommentDueToUnsupportedLanguage') {
-    return "Tune doesn't current support this language.";
+    return 'Tune doesn\'t current support this language.';
   } else {
     assert(commentVisibility.kind === 'hideCommentDueToScores');
     if (commentVisibility.scaledScore >= BLARING_THRESHOLD) {

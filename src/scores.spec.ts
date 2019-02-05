@@ -74,7 +74,7 @@ describe('getCommentVisibility', () => {
       const decision = getCommentVisibility(
         scores, 0.85, allEnabled(), true /* subtypesEnabled */);
       expect(decision).toEqual(
-        {kind:'hideCommentDueToScores', attribute:'severeToxicity', scaledScore: 0.9});
+        {kind: 'hideCommentDueToScores', attribute: 'severeToxicity', scaledScore: 0.9});
     });
 
     it('should hide severe toxicity without subtypes enabled', () => {
@@ -83,7 +83,7 @@ describe('getCommentVisibility', () => {
       const decision = getCommentVisibility(
         scores, 0.85, allEnabled(), false /* subtypesEnabled */);
       expect(decision).toEqual(
-        {kind:'hideCommentDueToScores', attribute:'severeToxicity', scaledScore: 0.9});
+        {kind: 'hideCommentDueToScores', attribute: 'severeToxicity', scaledScore: 0.9});
     });
 
     it('should show low severe toxicity with subtypes enabled', () => {
@@ -91,7 +91,7 @@ describe('getCommentVisibility', () => {
       scores.severeToxicity = 0.6;
       const decision = getCommentVisibility(
         scores, 0.9, allEnabled(), true /* subtypesEnabled */);
-      expect(decision).toEqual({kind:'showComment'});
+      expect(decision).toEqual({kind: 'showComment'});
     });
 
     it('should show low severe toxicity without subtypes enabled', () => {
@@ -99,7 +99,7 @@ describe('getCommentVisibility', () => {
       scores.severeToxicity = 0.6;
       const decision = getCommentVisibility(
         scores, 0.9, allEnabled(), false /* subtypesEnabled */);
-      expect(decision).toEqual({kind:'showComment'});
+      expect(decision).toEqual({kind: 'showComment'});
     });
   });
 
@@ -118,7 +118,7 @@ describe('getCommentVisibility', () => {
       // return the highest user-facing attribute, which in this case is
       // 'insult'. We always use the toxicity score though.
       expect(decision).toEqual(
-        {kind:'hideCommentDueToScores', attribute:'insult', scaledScore: 0.2});
+        {kind: 'hideCommentDueToScores', attribute: 'insult', scaledScore: 0.2});
     });
 
     it('should hide low quality without subtypes enabled', () => {
@@ -135,7 +135,7 @@ describe('getCommentVisibility', () => {
       // return the highest user-facing attribute, which in this case is
       // 'toxicity'.
       expect(decision).toEqual(
-        {kind:'hideCommentDueToScores', attribute:'toxicity', scaledScore: 0.2});
+        {kind: 'hideCommentDueToScores', attribute: 'toxicity', scaledScore: 0.2});
     });
 
     it('should show high quality with subtypes enabled', () => {
@@ -145,7 +145,7 @@ describe('getCommentVisibility', () => {
       scores.insult = 0.1;
       const decision = getCommentVisibility(
         scores, 0.15, allEnabled(), true /* subtypesEnabled */);
-      expect(decision).toEqual({kind:'showComment'});
+      expect(decision).toEqual({kind: 'showComment'});
     });
 
     it('should show high quality without subtypes enabled', () => {
@@ -155,7 +155,7 @@ describe('getCommentVisibility', () => {
       scores.insult = 0.1;
       const decision = getCommentVisibility(
         scores, 0.15, allEnabled(), false /* subtypesEnabled */);
-      expect(decision).toEqual({kind:'showComment'});
+      expect(decision).toEqual({kind: 'showComment'});
     });
 
     it('should show low toxicity with subtypes enabled', () => {
@@ -164,7 +164,7 @@ describe('getCommentVisibility', () => {
       scores.likelyToReject = 0.99;
       const decision = getCommentVisibility(
         scores, 0.15, allEnabled(), true /* subtypesEnabled */);
-      expect(decision).toEqual({kind:'showComment'});
+      expect(decision).toEqual({kind: 'showComment'});
     });
 
     it('should show low toxicity without subtypes enabled', () => {
@@ -173,7 +173,7 @@ describe('getCommentVisibility', () => {
       scores.likelyToReject = 0.99;
       const decision = getCommentVisibility(
         scores, 0.15, allEnabled(), false /* subtypesEnabled */);
-      expect(decision).toEqual({kind:'showComment'});
+      expect(decision).toEqual({kind: 'showComment'});
     });
   });
 
@@ -186,7 +186,7 @@ describe('getCommentVisibility', () => {
       const decision = getCommentVisibility(
         scores, 0.6, enabled, true /* subtypesEnabled */);
       expect(decision).toEqual(
-        {kind:'hideCommentDueToScores', attribute:'profanity',
+        {kind: 'hideCommentDueToScores', attribute: 'profanity',
          scaledScore: scaleEnabledAttributeScore(1.0)});
     });
 
@@ -200,7 +200,7 @@ describe('getCommentVisibility', () => {
       const decision = getCommentVisibility(
         scores, 0.5, enabled, true /* subtypesEnabled */);
       expect(decision).toEqual(
-        {kind:'hideCommentDueToScores', attribute:'insult',
+        {kind: 'hideCommentDueToScores', attribute: 'insult',
          scaledScore: scaleEnabledAttributeScore(0.90)});
     });
 
@@ -214,7 +214,7 @@ describe('getCommentVisibility', () => {
       const decision = getCommentVisibility(
         scores, 0.5, enabled, true /* subtypesEnabled */);
       expect(decision).toEqual(
-        {kind:'hideCommentDueToScores', attribute:'profanity',
+        {kind: 'hideCommentDueToScores', attribute: 'profanity',
          scaledScore: scaleEnabledAttributeScore(0.8)});
     });
 
@@ -228,7 +228,7 @@ describe('getCommentVisibility', () => {
       const decision = getCommentVisibility(
         scores, 0.5, enabled, false /* subtypesEnabled */);
       expect(decision).toEqual(
-        {kind:'hideCommentDueToScores', attribute:'toxicity',
+        {kind: 'hideCommentDueToScores', attribute: 'toxicity',
          scaledScore: scaleEnabledAttributeScore(0.80)});
     });
   });
@@ -308,7 +308,7 @@ describe('getHideDescription', () => {
 
   it('should show unsupported-language message', () => {
     expect(getHideReasonDescription({kind: 'hideCommentDueToUnsupportedLanguage'}))
-      .toBe("Tune doesn't current support this language.");
+      .toBe('Tune doesn\'t current support this language.');
   });
 });
 
