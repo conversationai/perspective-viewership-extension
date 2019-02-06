@@ -21,7 +21,6 @@
 
 // Attributes exposed to users in Tune settings.
 import * as tinygradient from 'tinygradient';
-import * as assert from 'assert';
 
 export type SettingAttributeName = 'identityAttack' | 'insult' | 'profanity' | 'threat' | 'sexuallyExplicit';
 export const SETTING_ATTRIBUTE_NAMES: Array<SettingAttributeName> = ['identityAttack', 'insult', 'profanity', 'threat', 'sexuallyExplicit'];
@@ -394,8 +393,7 @@ export function getHideReasonDescription(commentVisibility: CommentVisibilityDec
     return '';
   } else if (commentVisibility.kind === 'hideCommentDueToUnsupportedLanguage') {
     return 'Tune doesn\'t currently support this language.';
-  } else {
-    assert(commentVisibility.kind === 'hideCommentDueToScores');
+  } else if (commentVisibility.kind === 'hideCommentDueToScores') {
     if (commentVisibility.scaledScore >= BLARING_THRESHOLD) {
       return 'Blaring';
     } else if (commentVisibility.scaledScore >= LOUD_THRESHOLD) {
@@ -407,6 +405,10 @@ export function getHideReasonDescription(commentVisibility: CommentVisibilityDec
     } else {
       return 'Quiet';
     }
+  } else {
+    // Static check that we handled all possible cases.
+    const _shouldntHappen: never = commentVisibility;
+    return _shouldntHappen;
   }
 }
 
