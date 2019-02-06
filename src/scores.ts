@@ -275,6 +275,9 @@ function shouldHideCommentDueToAttributeScore(
   };
 }
 
+// Comments are hidden due to low quality when the threshold is quite low (only
+// in the "Quiet" range of the dial). We use a combination of both toxicity and
+// likelyToReject scores to try to filter low quality comments.
 function shouldHideCommentDueToLowQuality(scores: AttributeScores, threshold: number)
 : HideCommentDueToScores|null {
   if (threshold > LOW_THRESHOLD) {
@@ -282,9 +285,9 @@ function shouldHideCommentDueToLowQuality(scores: AttributeScores, threshold: nu
   }
   // Hack: Likely to reject is very sensitive, so we scale it down a bit.
   const scaledLikelyToReject = scores.likelyToReject * 0.6;
-  // Show comments that have *either* low likelytoReject score (i.e. similar to
-  // NYT-accepted comment), *or* low toxicity score (i.e. positive friendly
-  // stuff). To hide a comment, both criteria need to fail.
+  // The goal is to show comments that have *either* low likelytoReject score
+  // (i.e. similar to NYT-accepted comment), *or* low toxicity score (i.e.
+  // positive friendly stuff). Hide comments when they fail both criteria.
   if (scores.toxicity < threshold || scaledLikelyToReject < threshold) {
     return null;
   }
