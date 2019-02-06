@@ -77,6 +77,17 @@ describe('getCommentVisibility', () => {
         {kind: 'hideCommentDueToScores', attribute: 'severeToxicity', scaledScore: 0.9});
     });
 
+    it('should hide severe toxicity with subtypes enabled and give highest subtype', () => {
+      const scores = zeroScores();
+      scores.severeToxicity = 0.9;
+      scores.insult = 0.95;
+      const decision = getCommentVisibility(
+        scores, 0.85, allEnabled(), true /* subtypesEnabled */);
+      // Returns 'insult' as the attribute because it has a high score value.
+      expect(decision).toEqual(
+        {kind: 'hideCommentDueToScores', attribute: 'insult', scaledScore: 0.9});
+    });
+
     it('should hide severe toxicity without subtypes enabled', () => {
       const scores = zeroScores();
       scores.severeToxicity = 0.9;
@@ -114,11 +125,10 @@ describe('getCommentVisibility', () => {
       scores.insult = 0.1;
       const decision = getCommentVisibility(
         scores, 0.15, allEnabled(), true /* subtypesEnabled */);
-      // Even though the likelyToReject and toxicity scores are higher, we only
-      // return the highest user-facing attribute, which in this case is
-      // 'insult'. We always use the toxicity score though.
+      // We return the 'toxicity' attribute and score when hiding due to low
+      // quality.
       expect(decision).toEqual(
-        {kind: 'hideCommentDueToScores', attribute: 'insult', scaledScore: 0.2});
+        {kind: 'hideCommentDueToScores', attribute: 'toxicity', scaledScore: 0.2});
     });
 
     it('should hide low quality without subtypes enabled', () => {
@@ -131,9 +141,6 @@ describe('getCommentVisibility', () => {
       scores.insult = 0.1;
       const decision = getCommentVisibility(
         scores, 0.15, allEnabled(), false /* subtypesEnabled */);
-      // Even though the likelyToReject and toxicity scores are higher, we only
-      // return the highest user-facing attribute, which in this case is
-      // 'toxicity'.
       expect(decision).toEqual(
         {kind: 'hideCommentDueToScores', attribute: 'toxicity', scaledScore: 0.2});
     });

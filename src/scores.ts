@@ -275,8 +275,7 @@ function shouldHideCommentDueToAttributeScore(
   };
 }
 
-function shouldHideCommentDueToLowQuality(
-  scores: AttributeScores, maxAttributeScore: AttributeScore|null, threshold: number)
+function shouldHideCommentDueToLowQuality(scores: AttributeScores, threshold: number)
 : HideCommentDueToScores|null {
   if (threshold > LOW_THRESHOLD) {
     return null;
@@ -289,15 +288,11 @@ function shouldHideCommentDueToLowQuality(
   if (scores.toxicity < threshold || scaledLikelyToReject < threshold) {
     return null;
   }
-  const decision: HideCommentDueToScores = {
+  return {
     kind: 'hideCommentDueToScores',
     attribute: 'toxicity',
     scaledScore: scores.toxicity,
   };
-  if (maxAttributeScore !== null) {
-    decision.attribute = maxAttributeScore.attribute;
-  }
-  return decision;
 }
 
 // Response type for whether a comment should be hidden.
@@ -359,8 +354,7 @@ export function getCommentVisibility(
     maxAttributeScore, threshold);
   if (attributeScoreHideReason !== null) { return attributeScoreHideReason; }
 
-  const lowQualityHideReason = shouldHideCommentDueToLowQuality(
-    scores, maxAttributeScore, threshold);
+  const lowQualityHideReason = shouldHideCommentDueToLowQuality(scores, threshold);
   if (lowQualityHideReason !== null) { return lowQualityHideReason; }
 
   return show_comment;
@@ -421,10 +415,10 @@ export function getFeedbackQuestion(commentVisibility: CommentVisibilityDecision
   if (commentVisibility.kind === 'showComment') {
     return '';
   }
-  if (subtypesEnabled && commentVisibility.kind === 'hideCommentDueToScores') {
-    if (commentVisibility.scaledScore >= LOUD_THRESHOLD) {
-      return 'Is this ' + attributeWithPrefix(commentVisibility.attribute) + '?';
-    }
+  if (subtypesEnabled
+      && commentVisibility.kind === 'hideCommentDueToScores'
+      && commentVisibility.scaledScore >= LOUD_THRESHOLD) {
+    return 'Is this ' + attributeWithPrefix(commentVisibility.attribute) + '?';
   }
   return 'Should this be hidden?';
 }
