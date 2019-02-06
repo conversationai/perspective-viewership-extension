@@ -44,22 +44,23 @@ export function getMainDomainNameUnsafe(host: string): string {
 
 function createCommentTunerForSite(threshold: number,
                                    enabledAttributes: EnabledAttributes,
-                                   theme: ThemeType)
+                                   theme: ThemeType,
+                                   subtypesEnabled: boolean)
 : SiteTuner|null {
   // TODO: does this handle various "short" URLs? I believe at least 'youtu.be'
   // gets redirected to youtube.com, so that works, but check others.
   const domain = getCurrentMainDomainName();
   switch (domain) {
     case 'youtube.com':
-      return new YoutubeTuner(threshold, enabledAttributes, theme);
+      return new YoutubeTuner(threshold, enabledAttributes, theme, subtypesEnabled);
     case 'reddit.com':
-      return new RedditTuner(threshold, enabledAttributes, theme);
+      return new RedditTuner(threshold, enabledAttributes, theme, subtypesEnabled);
     case 'twitter.com':
-      return new TwitterTuner(threshold, enabledAttributes, theme);
+      return new TwitterTuner(threshold, enabledAttributes, theme, subtypesEnabled);
     case 'facebook.com':
-      return new FacebookTuner(threshold, enabledAttributes, theme);
+      return new FacebookTuner(threshold, enabledAttributes, theme, subtypesEnabled);
     case 'disqus.com':
-      return new DisqusTuner(threshold, enabledAttributes, theme);
+      return new DisqusTuner(threshold, enabledAttributes, theme, subtypesEnabled);
     default:
       console.log('site not handled?:', domain);
       return null;
@@ -75,7 +76,7 @@ async function launchCommentTuner() {
   const globalEnabled = await settings.getEnabled();
   const theme = await settings.getTheme();
   const siteTuner: SiteTuner|null = createCommentTunerForSite(
-    threshold, attributes, theme);
+    threshold, attributes, theme, subtypesEnabled);
   // If the site isn't enabled, we don't launch the tuner, but we still inject
   // the content script. This is so that if the site is enabled later, Tune
   // starts working.

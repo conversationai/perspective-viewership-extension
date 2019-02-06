@@ -140,7 +140,6 @@ export abstract class SiteTuner {
   protected shouldHandleRemoveMutations = false;
 
   private tuneEnabled = true;
-  private subtypesEnabled = false;
   private observer: MutationObserver = null;
 
   // Function to go from elements returned by commentBlockSelector to the text
@@ -185,7 +184,8 @@ export abstract class SiteTuner {
 
   constructor(protected threshold: number,
               protected enabledAttributes: EnabledAttributes,
-              protected theme: ThemeType) {
+              protected theme: ThemeType,
+              protected subtypesEnabled: boolean) {
     // Note: we create this on initialization but it doesn't start working until
     // we call 'observe' later on.
     this.observer = new MutationObserver(mutations => {
