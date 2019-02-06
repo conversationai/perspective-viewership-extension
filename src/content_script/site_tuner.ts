@@ -365,10 +365,7 @@ export abstract class SiteTuner {
         wrapperComponent.setAttribute(WRAPPER_SCORES_ATTR, JSON.stringify(scores));
       });
     }
-    return scoringPromise.then(() => {
-      this.setCommentVisibility(
-        wrapperComponent, this.threshold, this.enabledAttributes, this.subtypesEnabled);
-    });
+    return scoringPromise.then(() => this.setCommentVisibility(wrapperComponent));
   }
 
   // When nodes are removed, we want to remove any customization we did to the
@@ -393,15 +390,14 @@ export abstract class SiteTuner {
   }
 
   // TODO: maybe we should move this logic into the wrapper components?
-  private setCommentVisibility(wrapperComponent: Element, threshold: number,
-                               enabledAttributes: EnabledAttributes, subtypesEnabled: boolean) {
+  private setCommentVisibility(wrapperComponent: Element) {
     const scores = safeParse(wrapperComponent.getAttribute(WRAPPER_SCORES_ATTR));
     if (scores === undefined) {
       console.error('BUG: invalid scores? skipping comment:', scores, wrapperComponent);
     }
 
     const commentVisibility: CommentVisibilityDecision = getCommentVisibility(
-      scores, threshold, enabledAttributes, subtypesEnabled);
+      scores, this.threshold, this.enabledAttributes, this.subtypesEnabled);
 
     if (commentVisibility.kind === 'showComment') {
       wrapperComponent.setAttribute(WRAPPER_TUNE_STATE_ATTR, TUNE_STATE.show);
@@ -507,8 +503,7 @@ export abstract class SiteTuner {
           return;
         }
         wrapperComponent.setAttribute(WRAPPER_SCORES_ATTR, scores);
-        this.setCommentVisibility(
-          wrapperComponent, this.threshold, this.enabledAttributes, this.subtypesEnabled);
+        this.setCommentVisibility(wrapperComponent);
       });
   }
 
@@ -520,7 +515,6 @@ export abstract class SiteTuner {
                 this.threshold, this.enabledAttributes, this.subtypesEnabled);
     document.body
       .querySelectorAll('.' + WRAPPER_CLASS + '[' + WRAPPER_SCORES_ATTR + ']')
-      .forEach(wrapper => this.setCommentVisibility(
-          wrapper, this.threshold, this.enabledAttributes, this.subtypesEnabled));
+      .forEach(wrapper => this.setCommentVisibility(wrapper));
   }
 }
