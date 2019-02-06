@@ -77,7 +77,7 @@ describe('SiteTuner tests', () => {
 
   it('Tuner handles existing comments on launch', () => {
     const siteTuner =
-      new SiteTunerImpl(0.5, DEFAULT_ATTRIBUTES, THEMES.dotted);
+      new SiteTunerImpl(0.5, DEFAULT_ATTRIBUTES, THEMES.dotted, false);
     spyOn(siteTuner, 'handleAddedComment');
     siteTuner.launchTuner();
     expect(siteTuner.handleAddedComment).toHaveBeenCalledTimes(3);
@@ -85,7 +85,7 @@ describe('SiteTuner tests', () => {
 
   xit('Tuner handles added comments', (done) => {
     const siteTuner =
-      new SiteTunerImpl(0.5, DEFAULT_ATTRIBUTES, THEMES.dotted);
+      new SiteTunerImpl(0.5, DEFAULT_ATTRIBUTES, THEMES.dotted, false);
     siteTuner.launchTuner();
     const commentsContainer =
       document.querySelector('.' + COMMENTS_CONTAINER_CLASS) as HTMLElement;
@@ -117,7 +117,7 @@ describe('SiteTuner tests', () => {
 
   it('Test handleAddedNode correctly handles comment', () => {
     const siteTuner =
-      new SiteTunerImpl(0.5, DEFAULT_ATTRIBUTES, THEMES.dotted);
+      new SiteTunerImpl(0.5, DEFAULT_ATTRIBUTES, THEMES.dotted, false);
     siteTuner.launchTuner();
     const testComment = addComment('Foo bar');
 
@@ -128,7 +128,7 @@ describe('SiteTuner tests', () => {
 
   it('Test handleAddedNode ignores elements that are not comments', () => {
     const siteTuner =
-      new SiteTunerImpl(0.5, DEFAULT_ATTRIBUTES, THEMES.dotted);
+      new SiteTunerImpl(0.5, DEFAULT_ATTRIBUTES, THEMES.dotted, false);
     siteTuner.launchTuner();
     const testNotAComment = addComment('Foo bar');
     testNotAComment.classList.remove(COMMENT_CLASS);
@@ -140,7 +140,7 @@ describe('SiteTuner tests', () => {
 
   it('Test handleRemovedNode correctly handles comment', () => {
     const siteTuner =
-      new SiteTunerImpl(0.5, DEFAULT_ATTRIBUTES, THEMES.dotted);
+      new SiteTunerImpl(0.5, DEFAULT_ATTRIBUTES, THEMES.dotted, false);
     siteTuner.launchTuner();
     const testComment = addComment('Foo bar');
 
@@ -151,7 +151,7 @@ describe('SiteTuner tests', () => {
 
   it('Test handleRemovedNode ignores elements that are not comments', () => {
     const siteTuner =
-      new SiteTunerImpl(0.5, DEFAULT_ATTRIBUTES, THEMES.dotted);
+      new SiteTunerImpl(0.5, DEFAULT_ATTRIBUTES, THEMES.dotted, false);
     siteTuner.launchTuner();
     const testNotAComment = addComment('Foo bar');
     testNotAComment.classList.remove(COMMENT_CLASS);
@@ -174,7 +174,7 @@ describe('SiteTuner tests', () => {
     };
     chromeStub.runtime.sendMessage.yields(testScores);
 
-    const siteTuner = new SiteTunerImpl(0.5, DEFAULT_ATTRIBUTES, THEMES.dotted);
+    const siteTuner = new SiteTunerImpl(0.5, DEFAULT_ATTRIBUTES, THEMES.dotted, false);
     siteTuner.launchTuner();
 
     const testComment = addComment('Hello world!');
@@ -186,7 +186,7 @@ describe('SiteTuner tests', () => {
   });
 
   it('Tests wrapCommentBlock sets correct attributes', () => {
-    const siteTuner = new SiteTunerImpl(0.5, DEFAULT_ATTRIBUTES, THEMES.dotted);
+    const siteTuner = new SiteTunerImpl(0.5, DEFAULT_ATTRIBUTES, THEMES.dotted, false);
     siteTuner.launchTuner();
 
     const commentText = 'Hello world!';
@@ -201,7 +201,7 @@ describe('SiteTuner tests', () => {
 
   it('Test wrapCommentBlock wraps comment children', () => {
     const siteTuner =
-      new SiteTunerImpl(0.5, DEFAULT_ATTRIBUTES, THEMES.dotted);
+      new SiteTunerImpl(0.5, DEFAULT_ATTRIBUTES, THEMES.dotted, false);
     siteTuner.launchTuner();
 
     const commentText = 'Hello world!';
@@ -217,7 +217,7 @@ describe('SiteTuner tests', () => {
 
   it('Test unwrapCommentBlock', () => {
     const siteTuner =
-      new SiteTunerImpl(0.5, DEFAULT_ATTRIBUTES, THEMES.dotted);
+      new SiteTunerImpl(0.5, DEFAULT_ATTRIBUTES, THEMES.dotted, false);
     siteTuner.launchTuner();
 
     const commentText = 'Hello world!';
@@ -234,7 +234,7 @@ describe('SiteTuner tests', () => {
 
   it('Test unwrapCommentBlock on not-yet-wrapped block', () => {
     const siteTuner =
-      new SiteTunerImpl(0.5, DEFAULT_ATTRIBUTES, THEMES.dotted);
+      new SiteTunerImpl(0.5, DEFAULT_ATTRIBUTES, THEMES.dotted, false);
     siteTuner.launchTuner();
 
     const commentText = 'Hello world!';
@@ -244,7 +244,7 @@ describe('SiteTuner tests', () => {
 
   it('Test handleRemovedComment', () => {
     const siteTuner =
-      new SiteTunerImpl(0.5, DEFAULT_ATTRIBUTES, THEMES.dotted);
+      new SiteTunerImpl(0.5, DEFAULT_ATTRIBUTES, THEMES.dotted, false);
     siteTuner.launchTuner();
 
     const commentText = 'Hello world!';
