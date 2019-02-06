@@ -221,6 +221,9 @@ export function linscale(
   return valueAlongNewScale;
 }
 
+// The following shouldHideCommentDueTo* functions return HideCommentDueToScores
+// if the comment should be hidden or null if the comment shouldn't be hidden
+// due to the given criteria.
 function shouldHideCommentDueToSevereToxicity(
   severeToxicityScore: number, maxAttributeScore: AttributeScore|null, threshold: number)
 : HideCommentDueToScores|null {
