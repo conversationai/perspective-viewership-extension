@@ -77,7 +77,7 @@ describe('SiteTuner tests', () => {
 
   it('Tuner handles existing comments on launch', () => {
     const siteTuner =
-      new SiteTunerImpl(0.5, DEFAULT_ATTRIBUTES, THEMES.dotted);
+      new SiteTunerImpl(0.5, DEFAULT_ATTRIBUTES, THEMES.dotted, false);
     spyOn(siteTuner, 'handleAddedComment');
     siteTuner.launchTuner();
     expect(siteTuner.handleAddedComment).toHaveBeenCalledTimes(3);
