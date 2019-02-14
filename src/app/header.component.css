@@ -52,6 +52,11 @@
   padding-right: 24px;
 }
 
+.logoHedge {
+  color: rgba(255,255,255,0.54);
+  padding-left: 9px;
+}
+
 .enableSwitch {
   margin-right: 20px;
   opacity: 1;
