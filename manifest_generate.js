@@ -69,9 +69,9 @@ const DEV_CONFIG = {
 };
 
 const PROD_CONFIG = {
-  'name': 'Tune (beta)',
-  'version': '0.2.2',
-  'version_name': '0.2.2 beta-testing',
+  'name': 'Tune (experimental)',
+  'version': '0.2.3',
+  'version_name': '0.2.3 experimental',
   'content_security_policy': "script-src 'self' https://www.google.com https://www.google-analytics.com https://support.google.com https://www.gstatic.com; object-src 'self'",
 };
 
