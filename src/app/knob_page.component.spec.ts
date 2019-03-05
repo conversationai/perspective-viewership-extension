@@ -21,6 +21,7 @@ import { KnobPageComponent } from './knob_page.component';
 
 import { ChromeMessageService } from './chrome_message.service';
 import { TuneSettingsManagerService } from './tune_settings_manager.service';
+import { GoogleAnalyticsService } from './google_analytics.service';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -51,6 +52,17 @@ describe('KnobPageComponent', () => {
   let settingsSavedThreshold: number|null = null;
 
   beforeEach(async(() => {
+    const googleAnalyticsServiceMock = {
+      appendGaTrackingCode: (hostElement) => {
+        console.log('mock appendGaTrackingCode');
+      },
+      emitEvent: (eventCategory: string, eventAction: string,
+                eventLabel: string|null = null,
+                eventValue: number|null = null) => {
+        console.log(
+          'mock emitEvent', eventCategory, eventAction, eventLabel, eventValue);
+      }
+    };
     // TODO: Using a mock here because the chrome local storage API isn't
     // available. Maybe we should use a spy instead?
     const settingsManagerServiceMock = {
@@ -81,6 +93,10 @@ describe('KnobPageComponent', () => {
         HttpClientTestingModule,  // Needed for MatIconModule.
       ],
       providers: [
+        {
+          provide: GoogleAnalyticsService,
+          useValue: googleAnalyticsServiceMock
+        },
         {
           provide: TuneSettingsManagerService,
           useValue: settingsManagerServiceMock
@@ -170,7 +186,7 @@ describe('KnobPageComponent', () => {
   // TODO: radial drag around the circle is untested. a little tricky..
 
   it('should save threshold to settings manager', () => {
-    knobPage.setDialPosition(0.33, false);
+    knobPage.setDialPosition(0.33, false, false);
     expect(knobPage.dialPosition).toEqual(0.33);
     expect(settingsSavedThreshold).toEqual(0.33);
   });
@@ -178,7 +194,7 @@ describe('KnobPageComponent', () => {
   it('should show special descriptions for dial endpoints', () => {
     const descriptionCarousel = fixture.nativeElement.querySelector('.knobDescriptionChoice > .carousel');
 
-    knobPage.setDialPosition(0.0, false);
+    knobPage.setDialPosition(0.0, false, false);
     fixture.detectChanges();
     expect(knobPage.knobDescriptionIndex).toBe(0);
 
@@ -190,7 +206,7 @@ describe('KnobPageComponent', () => {
       }
     }
 
-    knobPage.setDialPosition(1.0, false);
+    knobPage.setDialPosition(1.0, false, false);
     fixture.detectChanges();
     expect(knobPage.knobDescriptionIndex).toBe(2);
     for (const child of descriptionCarousel.children) {
@@ -205,7 +221,7 @@ describe('KnobPageComponent', () => {
   it('should update "Keep it X" text description', () => {
     const wordCarousel = fixture.nativeElement.querySelector('.knobSubDescriptionChoice > .carousel');
 
-    knobPage.setDialPosition(0.10, false);
+    knobPage.setDialPosition(0.10, false, false);
     fixture.detectChanges();
     expect(knobPage.knobSubDescriptionIndex).toBe(0);
     for (const child of wordCarousel.children) {
@@ -216,7 +232,7 @@ describe('KnobPageComponent', () => {
       }
     }
 
-    knobPage.setDialPosition(0.90, false);
+    knobPage.setDialPosition(0.90, false, false);
     fixture.detectChanges();
     expect(knobPage.knobSubDescriptionIndex).toBe(4);
     for (const child of wordCarousel.children) {

@@ -217,6 +217,5 @@ export class AppComponent {
 
   changeToAboutTab(): void {
     this.navigationTabs.selectedIndex = ABOUT_TAB_INDEX;
-    this.googleAnalyticsService.sendPageView(Page.ABOUT);
   }
 }

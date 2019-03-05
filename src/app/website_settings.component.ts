@@ -18,6 +18,7 @@ import { DEFAULT_WEBSITES, EnabledWebsites, WebsiteSettingName, WEBSITE_NAME_MAP
 import { DomSanitizer } from '@angular/platform-browser';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatIconRegistry } from '@angular/material/icon';
+import { GoogleAnalyticsService, EventAction, EventCategory } from './google_analytics.service';
 
 const YOUTUBE_ICON_LOCATION = 'ic_youtube.svg';
 const TWITTER_ICON_LOCATION = 'ic_twitter.svg';
@@ -45,7 +46,8 @@ export class WebsiteSettingsComponent {
 
   constructor(private tuneSettingsManagerService: TuneSettingsManagerService,
               private sanitizer: DomSanitizer,
-              private matIconRegistry: MatIconRegistry) {
+              private matIconRegistry: MatIconRegistry,
+              private googleAnalyticsService: GoogleAnalyticsService) {
     // Note: The bypassSecurity function is required to register svg files with
     // the icon registry. Alternate options are not currently available. This is
     // safe because these are all referencing static files that are packaged
@@ -63,7 +65,8 @@ export class WebsiteSettingsComponent {
       });
   }
 
-  onChecked() {
+  onChecked(website: WebsiteSettingName) {
+    this.logWebsiteToggled(website);
     this.tuneSettingsManagerService.setWebsites(this.websites);
   }
 
@@ -95,23 +98,30 @@ export class WebsiteSettingsComponent {
 
   // TODO: Investigate why space bar/enter don't work automatically for the
   // checkbox in the list items when using ChromeVox.
-  sendKeyEventToCheckbox(website: string) {
+  sendKeyEventToCheckbox(website: WebsiteSettingName) {
     this.websites[website] = !this.websites[website];
     // Note: For some reason, the (change) event for the checkbox doesn't get
-    // triggered here, so we make the callback here.
-    this.onChecked();
+    // triggered here, so we make the callback to onChecked() manually.
+    this.onChecked(website);
   }
 
   sendClickEventToCheckbox(event: MouseEvent, checkbox: MatCheckbox,
-                           website: string) {
+                           website: WebsiteSettingName) {
     // Checks if the click event is already contained within the checkbox, to
     // avoid changing the checkbox state twice (the checkbox handles clicks
     // automatically).
     if (!checkbox._elementRef.nativeElement.contains(event.target)) {
       this.websites[website] = !this.websites[website];
       // Note: For some reason, the (change) event for the checkbox doesn't get
-      // triggered here, so we make the callback here.
-      this.onChecked();
+      // triggered here, so we make the callback to onChecked() manually.
+      this.onChecked(website);
     }
+  }
+
+  logWebsiteToggled(website: WebsiteSettingName) {
+    this.googleAnalyticsService.emitEvent(
+      EventCategory.WEBSITE_OPTION,
+      this.websites[website] ? EventAction.TOGGLE_ON : EventAction.TOGGLE_OFF,
+      website);
   }
 }

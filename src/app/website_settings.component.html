@@ -49,7 +49,7 @@
         </div>
         <div class="websiteName">{{websiteNameMap[website]}}</div>
         <div class="checkboxContainer">
-          <mat-checkbox #checkbox [(ngModel)]="websites[website]" (change)="onChecked()"></mat-checkbox>
+          <mat-checkbox #checkbox [(ngModel)]="websites[website]" (change)="onChecked(website)"></mat-checkbox>
         </div>
       </mat-list-item>
     </mat-selection-list>

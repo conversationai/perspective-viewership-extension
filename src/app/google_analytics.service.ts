@@ -14,6 +14,7 @@
 
 import { Injectable } from '@angular/core';
 import { environment } from '../environments/environment';
+import { SettingAttributeName } from '../scores';
 import { WebsiteSettingName } from '../tune_settings';
 // Hack to prevent Typescript error "Cannot find name 'ga'" when using google
 // analytics. The type definition has to be imported directly from types because
@@ -33,38 +34,47 @@ export enum Page {
   ABOUT = '/popup/about.html',
   FEEDBACK = '/popup/feedback.html',
   THEMES = '/popup/themes.html'
-};
-
-/** We use the category to refer to which element was interacted with. */
-export enum EventCategory {
-  MASTER_ON_OFF = 'master_on_off',
-  SETTINGS_BUTTON = 'settings_button',
-  WEBSITE_OPTION = 'website_option',
-  FILTER_OPTION = 'filter_option',
-  SHOW_ALL = 'show_all',
-  HIDE_ALL = 'hide_all'
-}
-
-export enum EventAction {
-  CLICK = 'click',
-  TOGGLE = 'toggle',
-  DIAL_MOVE = 'dial_move'
-}
-
-export enum FilterOption {
-  DEFAULT = 'default',
-  EXPERIMENTAL = 'experimental'
-}
-export enum ToggleOption {
-  ON = 'on',
-  OFF = 'off'
 }
 
 /**
- * We use the label to refer to which option was selected, which can be either
- * a subselection of EventCategory or EventAction.
+ * We use the category to refer to which element was interacted with, per
+ * documentation guidelines:
+ * https://developers.google.com/analytics/devguides/collection/analyticsjs/events
  */
-export type EventLabel = WebsiteSettingName | FilterOption | ToggleOption;
+export enum EventCategory {
+  MASTER_ON_OFF = 'master_on_off',
+  TITLE_BUTTON = 'header_title',
+  SETTINGS_BUTTON = 'settings_button',
+  WEBSITE_OPTION = 'website_option',
+  EXPERIMENTAL_FILTER_OPTION = 'experimental_filter_option',
+  SUBTYPE_OPTION = 'subtype_option',
+  SHOW_ALL = 'show_all',
+  HIDE_ALL = 'hide_all',
+  DIAL = 'dial',
+  DISABLED_PAGE_OUTGOING_LINK = 'disabled_page_outgoing_link'
+}
+
+/**
+ * We use EventAction to refer to the type of interaction, per documentation
+ * guidelines:
+ * https://developers.google.com/analytics/devguides/collection/analyticsjs/events
+ */
+export enum EventAction {
+  CLICK = 'click',
+  TOGGLE_ON = 'toggle_on',
+  TOGGLE_OFF = 'toggle_off',
+  DIAL_MOVE = 'dial_move'
+}
+
+export type OutgoingLinkName = 'https://youtube.com' | 'https://twitter.com'
+                               | 'https://facebook.com' | 'https://reddit.com';
+
+/**
+ * The documentation says to use this field for 'categorizing events'.
+ * We use the label to refer to which option was selected when the
+ * EventCategory refers to a list of options.
+ */
+export type EventLabel = WebsiteSettingName | SettingAttributeName | OutgoingLinkName | null;
 
 
 /** Service for sending Google Analytics events. */
@@ -79,8 +89,10 @@ export class GoogleAnalyticsService {
    */
   public appendGaTrackingCode(hostElement: HTMLElement) {
     ga((tracker) => {
-      console.log('Google analytics script finished loading!');
-      console.log('Client id', tracker.get('clientId'));
+      if (!environment.production) {
+        console.log('Google analytics script finished loading!');
+        console.log('Client id', tracker.get('clientId'));
+      }
     });
     ga('create', environment.googleAnalyticsKey, 'auto');
     // Removes failing protocol check.
@@ -94,7 +106,9 @@ export class GoogleAnalyticsService {
 
   /** Records a google analytics pageview. */
   public sendPageView(page: Page): void {
-    console.log('Sending pageview event for page', page);
+    if (!environment.production) {
+      console.log('Sending pageview event for page', page);
+    }
     ga('send', 'pageview', page);
   }
 
@@ -106,6 +120,10 @@ export class GoogleAnalyticsService {
   public emitEvent(eventCategory: EventCategory, eventAction: EventAction,
                    eventLabel: EventLabel|null = null,
                    eventValue: number|null = null) {
+    if (!environment.production) {
+      console.log(
+        'Emitting event', eventCategory, eventAction, eventLabel, eventValue);
+    }
     ga('send', 'event', {
       eventCategory: eventCategory,
       eventLabel: eventLabel,
