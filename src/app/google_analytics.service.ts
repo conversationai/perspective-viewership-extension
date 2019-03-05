@@ -98,9 +98,6 @@ export class GoogleAnalyticsService {
     // Removes failing protocol check.
     // See http://stackoverflow.com/a/22152353/1958200
     ga('set', 'checkProtocolTask', () => {});
-    // TODO: Define a set of pages we want to log pageviews for. I think that
-    // the third argument here can be arbitrary (but must be set for analytics
-    // to log the url; it normaly rejects chrome extension urls).
     this.sendPageView(Page.APP);
   }
 
@@ -109,6 +106,9 @@ export class GoogleAnalyticsService {
     if (!environment.production) {
       console.log('Sending pageview event for page', page);
     }
+    // The third argument here can be arbitrary (but must be set for analytics
+    // to log the url; it normaly rejects chrome extension urls). We use it to
+    // distinguish different pages in the app.
     ga('send', 'pageview', page);
   }
 
