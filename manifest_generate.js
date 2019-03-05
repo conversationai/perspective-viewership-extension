@@ -26,6 +26,9 @@ const MANIFEST_BASE = {
         'default_icon': 'popup/ic_tune_quiet.png',
         'default_popup': 'popup/popup.html'
     },
+    'icons': {
+        '128': 'Tune-chromestore-icon-1x.png'
+    },
     'background': {
         'scripts': ['background/background.js'],
         'persistent': false
