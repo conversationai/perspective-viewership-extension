@@ -62,23 +62,23 @@
           Read comments on enabled sites to start using Tune.
         </div>
         <div class="websiteLinks">
-        <button mat-button class="websiteLink" (click)="openLink('https://youtube.com')">
+        <button mat-button class="websiteLink" (click)="openDisabledPageLink('https://youtube.com')">
           <mat-icon svgIcon="youtube"></mat-icon>
           YouTube
         </button>
-        <button mat-button class="websiteLink" (click)="openLink('https://twitter.com')">
+        <button mat-button class="websiteLink" (click)="openDisabledPageLink('https://twitter.com')">
           <mat-icon svgIcon="twitter"></mat-icon>
           Twitter
         </button>
-        <button mat-button class="websiteLink" (click)="openLink('https://facebook.com')">
+        <button mat-button class="websiteLink" (click)="openDisabledPageLink('https://facebook.com')">
           <mat-icon svgIcon="facebook"></mat-icon>
           Facebook
         </button>
-        <button mat-button class="websiteLink" (click)="openLink('https://reddit.com')">
+        <button mat-button class="websiteLink" (click)="openDisabledPageLink('https://reddit.com')">
           <mat-icon svgIcon="reddit"></mat-icon>
           Reddit
         </button>
-        + most major publisher sites
+        + many publisher sites
         </div>
       </div>
     </div>
@@ -99,7 +99,10 @@
       role="heading"
       [attr.aria-hidden]="currentWebsite === null"
       [attr.aria-label]="'Dial control. Dial position is at ' + round(dialPosition * 100) + 'percent. Use the arrow keys to change the dial position.'">
-    <div #dragZone id="dragZone" class="dragzone" draggable="true" (dragstart)="onKnobDragStart($event)" (drag)="onKnobDrag($event)">
+    <div #dragZone id="dragZone" class="dragzone" draggable="true"
+         (dragstart)="onKnobDragStart($event)"
+         (drag)="onKnobDrag($event)"
+         (dragend)="onKnobDragEnd($event)">
     </div>
     <div #dial class="dial" (transitionend)="transitionEnd($event)">
       <div #tail class="tail"></div>
@@ -120,7 +123,8 @@
     <div class="dialLine right" [ngClass]="{'disabled': shouldUseDisabledUIStyle()}"></div>
   </div>
   <div class="settingsButtonContainer">
-    <button mat-icon-button aria-label="settings" (click)="openSettings()">
+    <button mat-icon-button aria-label="settings"
+            (click)="openSettings(); onSettingsButtonClicked();">
       <mat-icon>settings</mat-icon>
     </button>
   </div>
@@ -130,9 +134,11 @@
     }" [attr.aria-hidden]="currentWebsite === null">
     <button mat-button id="hideAll"
             aria-label="Hide all"
-            [disabled]="shouldIgnoreKnobInteractionEvents()" (click)="setDialPosition(0, true)">Hide All</button>
+            [disabled]="shouldIgnoreKnobInteractionEvents()"
+            (click)="setDialPosition(0, true, true); onHideAllClicked();">Hide All</button>
     <button mat-button id="showAll"
             aria-label="Show all"
-            [disabled]="shouldIgnoreKnobInteractionEvents()" (click)="setDialPosition(1, true)">Show All</button>
+            [disabled]="shouldIgnoreKnobInteractionEvents()"
+            (click)="setDialPosition(1, true, true); onShowAllClicked();">Show All</button>
   </div>
 </div>

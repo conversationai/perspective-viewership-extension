@@ -25,6 +25,8 @@ import { LOW_THRESHOLD, MEDIUM_THRESHOLD, LOUD_THRESHOLD, BLARING_THRESHOLD,
 import { ChromeMessageEnum, GetCurrentWebsiteResponse } from '../messages';
 import { EnabledWebsites, DEFAULT_WEBSITES, WEBSITE_NAME_MAP, WEBSITE_NAMES,
          WebsiteSettingName } from '../tune_settings';
+import { GoogleAnalyticsService, Page, EventAction,
+         EventCategory, OutgoingLinkName } from './google_analytics.service';
 import * as throttle from 'lodash/throttle';
 
 const THRESHOLD_CHANGE_THROTTLE = 200;
@@ -205,7 +207,8 @@ export class KnobPageComponent implements AfterViewInit, OnChanges {
   constructor(private sanitizer: DomSanitizer,
               private matIconRegistry: MatIconRegistry,
               private tuneSettingsManagerService: TuneSettingsManagerService,
-              private chromeMessageService: ChromeMessageService) {
+              private chromeMessageService: ChromeMessageService,
+              private googleAnalyticsService: GoogleAnalyticsService) {
     this.updateSettingsThreshold = throttle(threshold => {
       this.tuneSettingsManagerService.setThreshold(threshold);
     }, THRESHOLD_CHANGE_THROTTLE);
@@ -247,7 +250,8 @@ export class KnobPageComponent implements AfterViewInit, OnChanges {
       console.log('initializing threshold:', threshold);
       if (this.applyAnimateInAnimationClass) {
         this.resetToZero().then(() => {
-          this.setDialPosition(threshold, true);
+          this.setDialPosition(
+            threshold, true /* animated */, false /* logEvent*/);
         });
       } else {
         // Wrap this in a Promise.resolve because any changes to state made here
@@ -261,7 +265,8 @@ export class KnobPageComponent implements AfterViewInit, OnChanges {
         // TODO: Find out if there is a way to fix the bug in the tests without
         // this workaround.
         Promise.resolve().then(() => {
-          this.setDialPosition(threshold, false);
+          this.setDialPosition(
+            threshold, false /* animated */, false /* logEvent*/);
         });
       }
     });
@@ -294,7 +299,7 @@ export class KnobPageComponent implements AfterViewInit, OnChanges {
 
     this.knobDescriptionCarousel.nativeElement.style.transition = 'none';
     this.knobSubDescriptionCarousel.nativeElement.style.transition = 'none';
-    this.setDialPosition(0, false);
+    this.setDialPosition(0, false /* animated */, false /* logEvent */);
     return new Promise((resolve, reject) => {
       // Without this setTimeout, the knob will immediately jump to the
       // threshold instead of animating from zero.
@@ -356,8 +361,10 @@ export class KnobPageComponent implements AfterViewInit, OnChanges {
         throw new Error('BUG: unhandled eventType: ' + eventType);
     }
 
-    const threshold = this.getThresholdFromKnobRotationDegrees(getDegrees(angleRadians));
-    this.setDialPosition(threshold, animated);
+    const threshold =
+      this.getThresholdFromKnobRotationDegrees(getDegrees(angleRadians));
+    const logEvent = eventType === 'click';
+    this.setDialPosition(threshold, animated, logEvent);
   }
 
   onDialClick(event: MouseEvent): void {
@@ -395,6 +402,14 @@ export class KnobPageComponent implements AfterViewInit, OnChanges {
     this.knobDragStartDialPosition = this.dialPosition;
   }
 
+  onKnobDragEnd(event: MouseEvent): void {
+    this.googleAnalyticsService.emitEvent(
+      EventCategory.DIAL,
+      EventAction.DIAL_MOVE,
+      null /* eventLabel */,
+      this.dialPosition);
+  }
+
   // Handles left-right and up-down mouse dragging.
   handleDirectionalDrag(event: MouseEvent): void {
     const dragDeltaX = event.x - this.knobDragStartMousePosition.x;
@@ -408,7 +423,11 @@ export class KnobPageComponent implements AfterViewInit, OnChanges {
     // change from 0->1 or vice versa.
     const changeMultiplier = 2;
     const positionChange = maxDelta / this.overallWidth * changeMultiplier;
-    this.setDialPosition(this.knobDragStartDialPosition + positionChange, false);
+    this.setDialPosition(
+      this.knobDragStartDialPosition + positionChange,
+      false /* animated */,
+      false /* logEvent */
+    );
   }
 
   onKnobDrag(event: MouseEvent): void {
@@ -478,15 +497,29 @@ export class KnobPageComponent implements AfterViewInit, OnChanges {
   // TODO: Not animating makes these a little abrupt, but animating makes them
   // feel too sluggish. Maybe have adjustable animation speed?
   decrementDialPosition(): void {
-    this.setDialPosition(this.dialPosition - INPUT_DELTA_AMOUNT, false);
+    this.setDialPosition(
+      this.dialPosition - INPUT_DELTA_AMOUNT,
+      false /* animated */,
+      true /* logEvent */);
   }
 
   incrementDialPosition(): void {
-    this.setDialPosition(this.dialPosition + INPUT_DELTA_AMOUNT, false);
+    this.setDialPosition(
+      this.dialPosition + INPUT_DELTA_AMOUNT,
+      false /* animated */,
+      true /* logEvent */);
   }
 
-  setDialPosition(value: number, animated: boolean): void {
+  setDialPosition(value: number, animated: boolean, logEvent: boolean): void {
     value = Math.min(Math.max(value, 0.0), 1.0);
+
+    if (logEvent) {
+      this.googleAnalyticsService.emitEvent(
+        EventCategory.DIAL,
+        EventAction.DIAL_MOVE,
+        null /* eventLabel */,
+        value);
+    }
 
     this.updateSettingsThreshold(value);
     this.dialPosition = value;
@@ -599,8 +632,10 @@ export class KnobPageComponent implements AfterViewInit, OnChanges {
     this.settingsButtonClicked.emit(openSettingsEvent);
   }
 
-  openLink(url: string) {
+  openDisabledPageLink(url: OutgoingLinkName) {
     chrome.tabs.create({url: url, active: false});
+    this.googleAnalyticsService.emitEvent(
+      EventCategory.DISABLED_PAGE_OUTGOING_LINK, EventAction.CLICK, url);
   }
 
   round(value: number): number {
@@ -636,5 +671,22 @@ export class KnobPageComponent implements AfterViewInit, OnChanges {
     // the Angular pattern. We should look into alternative solutions.
     return this.navigationTabs._elementRef.nativeElement.querySelector(
       '.mat-tab-label.cdk-keyboard-focused') !== null;
+  }
+
+  onHideAllClicked() {
+    this.googleAnalyticsService.emitEvent(
+      EventCategory.HIDE_ALL, EventAction.CLICK);
+
+  }
+
+  onShowAllClicked() {
+    this.googleAnalyticsService.emitEvent(
+      EventCategory.SHOW_ALL, EventAction.CLICK);
+  }
+
+  onSettingsButtonClicked() {
+    this.googleAnalyticsService.emitEvent(
+      EventCategory.SETTINGS_BUTTON, EventAction.CLICK);
+
   }
 }

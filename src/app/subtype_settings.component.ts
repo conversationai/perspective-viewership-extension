@@ -15,8 +15,10 @@
 import { Component, EventEmitter, OnInit, AfterViewInit, Output } from '@angular/core';
 import { TuneSettingsManagerService } from './tune_settings_manager.service';
 import { DEFAULT_ATTRIBUTES } from '../tune_settings';
-import { EnabledAttributes, ATTRIBUTE_NAME_MAP, SETTING_ATTRIBUTE_NAMES } from '../scores';
+import { EnabledAttributes, ATTRIBUTE_NAME_MAP, SETTING_ATTRIBUTE_NAMES,
+         SettingAttributeName } from '../scores';
 import { MatCheckbox } from '@angular/material/checkbox';
+import { GoogleAnalyticsService, EventAction, EventCategory } from './google_analytics.service';
 
 // Animate in animation length (1s) + longest cascading animation delay (850ms)
 const ANIMATE_IN_TIME_MS = 1850;
@@ -38,7 +40,8 @@ export class SubtypeSettingsComponent {
 
   @Output() learnMoreClicked = new EventEmitter<void>();
 
-  constructor(private tuneSettingsManagerService: TuneSettingsManagerService) {
+  constructor(private tuneSettingsManagerService: TuneSettingsManagerService,
+              private googleAnalyticsService: GoogleAnalyticsService) {
     tuneSettingsManagerService.attributes.subscribe(
       (attributes: EnabledAttributes) => {
         console.log('initializing attributes:', attributes);
@@ -76,7 +79,8 @@ export class SubtypeSettingsComponent {
     });
   }
 
-  onChecked() {
+  onChecked(attribute: SettingAttributeName) {
+    this.logSubtypeToggled(attribute);
     this.tuneSettingsManagerService.setAttributes(this.attributes);
   }
 
@@ -86,27 +90,37 @@ export class SubtypeSettingsComponent {
 
   // TODO: Investigate why space bar/enter don't work automatically for the
   // checkbox in the list items when using ChromeVox.
-  sendKeyEventToCheckbox(attribute: string) {
+  sendKeyEventToCheckbox(attribute: SettingAttributeName) {
     this.attributes[attribute] = !this.attributes[attribute];
     // Note: For some reason, the (change) event for the checkbox doesn't get
-    // triggered here, so we make the callback here.
-    this.onChecked();
+    // triggered here, so we make the callback to onChecked manually.
+    this.onChecked(attribute);
   }
 
   sendClickEventToCheckbox(event: MouseEvent, checkbox: MatCheckbox,
-                           attribute: string) {
+                           attribute: SettingAttributeName) {
     // Checks if the click event is already contained within the checkbox, to
     // avoid changing the checkbox state twice (the checkbox handles clicks
     // automatically).
     if (!checkbox._elementRef.nativeElement.contains(event.target)) {
       this.attributes[attribute] = !this.attributes[attribute];
       // Note: For some reason, the (change) event for the checkbox doesn't get
-      // triggered here, so we make the callback here.
-      this.onChecked();
+      // triggered here, so we make the callback to onChecked manually.
+      this.onChecked(attribute);
     }
   }
 
   updateSubtypesEnabledSetting() {
     this.tuneSettingsManagerService.setSubtypesEnabled(this.subtypesEnabled);
+    this.googleAnalyticsService.emitEvent(
+      EventCategory.EXPERIMENTAL_FILTER_OPTION,
+      this.subtypesEnabled ? EventAction.TOGGLE_ON : EventAction.TOGGLE_OFF);
+  }
+
+  logSubtypeToggled(attribute: SettingAttributeName) {
+    this.googleAnalyticsService.emitEvent(
+      EventCategory.SUBTYPE_OPTION,
+      this.attributes[attribute] ? EventAction.TOGGLE_ON : EventAction.TOGGLE_OFF,
+      attribute);
   }
 }

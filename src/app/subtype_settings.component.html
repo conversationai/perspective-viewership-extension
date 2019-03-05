@@ -53,7 +53,7 @@
                      }">
         <div class="attributeName">{{attributeNameMap[attribute]}}</div>
         <div class="checkboxContainer">
-          <mat-checkbox #checkbox [(ngModel)]="attributes[attribute]" (change)="onChecked()"></mat-checkbox>
+          <mat-checkbox #checkbox [(ngModel)]="attributes[attribute]" (change)="onChecked(attribute)"></mat-checkbox>
         </div>
       </mat-list-item>
     </mat-selection-list>

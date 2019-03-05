@@ -26,6 +26,7 @@
 import * as uuidv4 from 'uuid/v4';
 
 import { EnabledAttributes } from './scores';
+import { environment } from './environments/environment';
 
 export const THRESHOLD_KEY = 'tuneThreshold';
 export const ATTRIBUTES_KEY = 'tuneAttributes';
@@ -129,7 +130,9 @@ function saveStorage<T>(key: string, value: T): Promise<void> {
         console.error('error saving value (' + key + '):', chrome.runtime.lastError);
         reject();
       } else {
-        console.log('saved value (' + key + '):', value);
+        if (!environment.production) {
+          console.log('saved value (' + key + '):', value);
+        }
         resolve();
       }
     });
@@ -146,7 +149,9 @@ type OnEnabledSettingsChangeCallback = (globalEnabled: boolean, enabledWebsites:
 // getters and setters.
 export class TuneSettingsManager {
   constructor() {
-    console.log('settings manager created.');
+    if (!environment.production) {
+      console.log('settings manager created.');
+    }
   }
 
   getThreshold(): Promise<number> {
@@ -211,7 +216,9 @@ export class TuneSettingsManager {
       chrome.storage.local.get([SESSION_ID_KEY], (result) => {
         if (chrome.runtime.lastError || result[SESSION_ID_KEY] === undefined) {
           const new_id = uuidv4();
-          console.log('generating new session ID:', new_id);
+          if (!environment.production) {
+            console.log('generating new session ID:', new_id);
+          }
           saveStorage(SESSION_ID_KEY, new_id);
           resolve(new_id);
         } else {

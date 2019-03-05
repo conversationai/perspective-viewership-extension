@@ -14,6 +14,7 @@
 
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { TuneSettingsManagerService } from './tune_settings_manager.service';
+import { GoogleAnalyticsService, EventAction, EventCategory } from './google_analytics.service';
 
 @Component({
   selector: 'tune-app-header',
@@ -27,15 +28,22 @@ export class HeaderComponent {
 
   enabled = true;
 
-  constructor(private tuneSettingsManagerService: TuneSettingsManagerService) {
-    tuneSettingsManagerService.enabled.subscribe(enabled => this.enabled = enabled);
+  constructor(private tuneSettingsManagerService: TuneSettingsManagerService,
+              private googleAnalyticsService: GoogleAnalyticsService) {
+    tuneSettingsManagerService.enabled.subscribe(
+      enabled => this.enabled = enabled);
   }
 
   switchClicked() {
     this.tuneSettingsManagerService.setEnabled(this.enabled);
+    this.googleAnalyticsService.emitEvent(
+      EventCategory.MASTER_ON_OFF,
+      this.enabled ? EventAction.TOGGLE_ON : EventAction.TOGGLE_OFF);
   }
 
   onTitleClicked() {
     this.titleClicked.emit();
+    this.googleAnalyticsService.emitEvent(
+      EventCategory.TITLE_BUTTON, EventAction.CLICK);
   }
 }

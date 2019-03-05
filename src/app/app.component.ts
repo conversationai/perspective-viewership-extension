@@ -13,13 +13,13 @@
 // limitations under the License.
 
 import { Component, ElementRef, ViewChild } from '@angular/core';
-import { GoogleAnalyticsService } from './google_analytics.service';
+import { GoogleAnalyticsService, Page } from './google_analytics.service';
 import { TuneSettingsManagerService } from './tune_settings_manager.service';
 import { TUNE_INSTALL_STATES, TuneInstallStateType } from '../tune_settings';
 import { KnobPageComponent, OpenSettingsEvent } from './knob_page.component';
 import { HeaderComponent } from './header.component';
 import { SetupFlowComponent } from './setup_flow.component';
-import { SettingsPageComponent } from './settings_page.component';
+import { SettingsPageComponent, SettingsPage } from './settings_page.component';
 import { DomSanitizer } from '@angular/platform-browser';
 import { MatIconRegistry } from '@angular/material/icon';
 import { MatTabGroup } from '@angular/material/tabs';
@@ -34,6 +34,7 @@ const BRUSH_ICON = 'brush-icon';
 const BRUSH_ICON_LOCATION = 'ic_nav-themes.svg';
 const ABOUT_ICON = 'about-icon';
 const ABOUT_ICON_LOCATION = 'ic_nav-about.svg';
+const KNOB_TAB_INDEX = 0;
 // The about tab index is different depending on whether or not the themes
 // tab is present, which is currently only for dev builds.
 const ABOUT_TAB_INDEX = environment.production ? 1 : 2;
@@ -96,6 +97,7 @@ export class AppComponent {
               || !hasToken) {
             this.triggerSetupFlow();
           } else {
+            this.logKnobPageView();
             // TODO: hack. this is done so that the animation isn't always
             // running in the background even after the setup flow is completed.
             // would be better to not even load the setupFlow component in the
@@ -151,6 +153,7 @@ export class AppComponent {
 
   onSettingsOpened(openSettingsEvent: OpenSettingsEvent): void {
     this.settingsVisible = true;
+    this.googleAnalyticsService.sendPageView(Page.SETTINGS);
     // It shouldn't be possible to get into this state, but just in case.
     if (this.feedbackVisible) {
       console.error(
@@ -166,11 +169,24 @@ export class AppComponent {
     // If the desired settings page tab is specified, navigate to that tab.
     if (openSettingsEvent.tab) {
       this.settingsPage.setTab(openSettingsEvent.tab);
+      // The valueOf() is required because you can't directly compare two enum
+      // objects in Typescript; see https://stackoverflow.com/q/39785320.
+      this.googleAnalyticsService.sendPageView(
+        openSettingsEvent.tab.valueOf() === SettingsPage.WEBSITES
+            ? Page.WEBSITE_SETTINGS
+            : Page.FILTER_SETTINGS);
+    } else {
+      this.googleAnalyticsService.sendPageView(
+        this.settingsPage.selectedTab.valueOf() === SettingsPage.WEBSITES
+            ? Page.WEBSITE_SETTINGS
+            : Page.FILTER_SETTINGS);
+
     }
   }
 
   onFeedbackOpened() {
     this.feedbackVisible = true;
+    this.googleAnalyticsService.sendPageView(Page.FEEDBACK);
     // It shouldn't be possible to get into this state, but just in case.
     if (this.settingsVisible) {
       console.error(
@@ -181,6 +197,22 @@ export class AppComponent {
 
   onSettingsClosed(): void {
     this.settingsVisible = false;
+  }
+
+  logKnobPageView(): void {
+    this.googleAnalyticsService.sendPageView(
+      this.knobComponent.currentWebsite === null ? Page.UNSUPPORTED_SITE
+                                                 : Page.DIAL);
+  }
+
+  onTabChange(selectedIndex: number): void {
+    if (selectedIndex === KNOB_TAB_INDEX) {
+      this.logKnobPageView();
+    } else if (selectedIndex === ABOUT_TAB_INDEX) {
+      this.googleAnalyticsService.sendPageView(Page.ABOUT);
+    } else {
+      this.googleAnalyticsService.sendPageView(Page.THEMES);
+    }
   }
 
   changeToAboutTab(): void {
