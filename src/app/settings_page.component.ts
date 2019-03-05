@@ -15,6 +15,7 @@
 import { Component, EventEmitter, OnInit, AfterViewInit, Output, ViewChild } from '@angular/core';
 import { MatTabGroup } from '@angular/material/tabs';
 import { TuneSettingsManagerService } from './tune_settings_manager.service';
+import { GoogleAnalyticsService, Page } from './google_analytics.service';
 
 export enum SettingsPage {
   WEBSITES = 0,
@@ -29,6 +30,8 @@ export enum SettingsPage {
 export class SettingsPageComponent {
   @Output() settingsClosed = new EventEmitter<void>();
   @ViewChild(MatTabGroup) settingPageTabs: MatTabGroup;
+
+  constructor(private googleAnalyticsService: GoogleAnalyticsService) {}
 
   selectedTab = SettingsPage.WEBSITES;
   learnMoreOpen = false;
@@ -47,5 +50,11 @@ export class SettingsPageComponent {
 
   setTab(settingsPage: SettingsPage) {
     this.selectedTab = settingsPage;
+  }
+
+  onTabChange(selectedIndex: number) {
+    this.googleAnalyticsService.sendPageView(
+      selectedIndex === SettingsPage.WEBSITES ? Page.WEBSITE_SETTINGS
+                                              : Page.FILTER_SETTINGS);
   }
 }

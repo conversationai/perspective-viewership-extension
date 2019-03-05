@@ -30,6 +30,7 @@
   <mat-tab-group mat-stretch-tabs id="tabGroup"
                  headerPosition="below"
                  role="navigation"
+                 (selectedIndexChange)="onTabChange($event)"
                  class="app-navigation"
                  [ngClass]="{
                    'hidden': feedbackVisible || settingsVisible || inSetupFlow,

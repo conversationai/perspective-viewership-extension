@@ -14,7 +14,10 @@
   limitations under the License.
 -->
 <div class="container">
-  <mat-tab-group class="tabsContainer" [dynamicHeight]="true" [(selectedIndex)]="selectedTab">
+  <mat-tab-group class="tabsContainer"
+                 [dynamicHeight]="true"
+                 [(selectedIndex)]="selectedTab"
+                 (selectedIndexChange)="onTabChange($event)">
     <mat-tab label="Sites">
       <tune-website-settings></tune-website-settings>
     </mat-tab>

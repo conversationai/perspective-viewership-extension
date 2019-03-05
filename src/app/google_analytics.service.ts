@@ -14,6 +14,7 @@
 
 import { Injectable } from '@angular/core';
 import { environment } from '../environments/environment';
+import { WebsiteSettingName } from '../tune_settings';
 // Hack to prevent Typescript error "Cannot find name 'ga'" when using google
 // analytics. The type definition has to be imported directly from types because
 // the library itself is loaded dynamically and not through npm.
@@ -21,6 +22,50 @@ import { environment } from '../environments/environment';
 // For more information on how google analytics is loaded, see
 // https://developers.google.com/analytics/devguides/collection/analyticsjs/
 import {} from '@types/google.analytics';
+
+export enum Page {
+  APP = '/popup/popup.html',
+  UNSUPPORTED_SITE = '/popup/unsupported_site.html',
+  DIAL = '/popup/dial.html',
+  SETTINGS = '/popup/settings.html',
+  WEBSITE_SETTINGS = '/popup/settings/website.html',
+  FILTER_SETTINGS = '/popup/settings/filter.html',
+  ABOUT = '/popup/about.html',
+  FEEDBACK = '/popup/feedback.html',
+  THEMES = '/popup/themes.html'
+};
+
+/** We use the category to refer to which element was interacted with. */
+export enum EventCategory {
+  MASTER_ON_OFF = 'master_on_off',
+  SETTINGS_BUTTON = 'settings_button',
+  WEBSITE_OPTION = 'website_option',
+  FILTER_OPTION = 'filter_option',
+  SHOW_ALL = 'show_all',
+  HIDE_ALL = 'hide_all'
+}
+
+export enum EventAction {
+  CLICK = 'click',
+  TOGGLE = 'toggle',
+  DIAL_MOVE = 'dial_move'
+}
+
+export enum FilterOption {
+  DEFAULT = 'default',
+  EXPERIMENTAL = 'experimental'
+}
+export enum ToggleOption {
+  ON = 'on',
+  OFF = 'off'
+}
+
+/**
+ * We use the label to refer to which option was selected, which can be either
+ * a subselection of EventCategory or EventAction.
+ */
+export type EventLabel = WebsiteSettingName | FilterOption | ToggleOption;
+
 
 /** Service for sending Google Analytics events. */
 @Injectable()
@@ -44,7 +89,13 @@ export class GoogleAnalyticsService {
     // TODO: Define a set of pages we want to log pageviews for. I think that
     // the third argument here can be arbitrary (but must be set for analytics
     // to log the url; it normaly rejects chrome extension urls).
-    ga('send', 'pageview', '/popup/popup.html');
+    this.sendPageView(Page.APP);
+  }
+
+  /** Records a google analytics pageview. */
+  public sendPageView(page: Page): void {
+    console.log('Sending pageview event for page', page);
+    ga('send', 'pageview', page);
   }
 
   /**
@@ -52,8 +103,8 @@ export class GoogleAnalyticsService {
    * Fire event example:
    *   this.emitEvent("testCategory", "testAction", "testLabel", 10);
    */
-  public emitEvent(eventCategory: string, eventAction: string,
-                   eventLabel: string|null = null,
+  public emitEvent(eventCategory: EventCategory, eventAction: EventAction,
+                   eventLabel: EventLabel|null = null,
                    eventValue: number|null = null) {
     ga('send', 'event', {
       eventCategory: eventCategory,
