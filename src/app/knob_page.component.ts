@@ -632,7 +632,7 @@ export class KnobPageComponent implements AfterViewInit, OnChanges {
     this.settingsButtonClicked.emit(openSettingsEvent);
   }
 
-  openLink(url: OutgoingLinkName) {
+  openDisabledPageLink(url: OutgoingLinkName) {
     chrome.tabs.create({url: url, active: false});
     this.googleAnalyticsService.emitEvent(
       EventCategory.DISABLED_PAGE_OUTGOING_LINK, EventAction.CLICK, url);
