@@ -43,14 +43,6 @@
   margin: 0;
 }
 
-:host[tune-state="show"] > .--tune-placeholder:hover {
-  background-color: #fff;
-}
-
-:host[tune-state="show"] > .--tune-placeholder.--tune-commentVisible {
-  background-color: #fff;
-}
-
 :host[tune-state="show"] > .--tune-placeholder > .--tune-hiddenCommentWrapper {
   opacity: 1;
 }
