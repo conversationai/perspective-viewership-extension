@@ -27,7 +27,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - run: npm install
-    - run: npm install --save-dev node-sass
+    - run: npm install node-sass@4.14.0
     - run: npm run lint
     - run: npm run build:all
     - run: npm run test:ci
