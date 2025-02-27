@@ -1,5 +1,7 @@
 # Tune
 
+**NOTE: Tune is no longer available.**
+
 Tune is a [Chrome Extension](https://chrome.google.com/webstore/category/extensions)
 that lets the user choose the 'volume' of the conversation they wish to read. It
 uses the [Perspective API](https://perspectiveapi.com/) to score comments, and
